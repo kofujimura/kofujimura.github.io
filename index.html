@@ -16,9 +16,6 @@
 
       function setup() {
         createCanvas(800, 800, WEBGL);
-        ambientLight(125, 125, 125);
-        directionalLight(255, 255, 255, 1, 1, 1);
-        pointLight(255, 255, 255, 0, 0, 800);
         noStroke();
         background(0);
       }
@@ -33,22 +30,23 @@
       function draw() {
         orbitControl();
         background(0);
+        ambientLight(50, 50, 50);
+        directionalLight(100, 20, 20, 1, 1, 1);
+        pointLight(20, 20, 100, 0, 0, 800);
+
         for (let i = 0; i < 10; i++) {
           for (let j = 0; j < 10; j++) {
+            push();
             if (sheet) {
               specularMaterial(i * 20, sheet[i][j], j * 20);
-              cube(
-                i * 60 - 300,
-                -sheet[i][j] / 2,
-                j * 60 - 300,
-                50,
-                sheet[i][j],
-                50
-              );
+              translate(i * 60 - 300, j * 60 - 300, sheet[i][j] / 2);
+              box(50, 50, sheet[i][j]);
             } else {
               specularMaterial(200, 200, 200);
-              cube(i * 60 - 300, 0, j * 60 - 300, 50, 1, 50);
+              translate(i * 60 - 300, j * 60 - 300, 0.5);
+              box(50, 50, 1);
             }
+            pop();
           }
         }
         // 変更した部分
