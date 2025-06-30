@@ -17,30 +17,12 @@ export default function Navigation() {
               >
                 このサイトについて
               </Link>
-              <Link 
-                href="/03-ゼミ紹介" 
-                className="hover:text-gray-300 transition-colors"
-              >
-                ゼミ紹介
-              </Link>
-              <Link 
-                href="/recursive_tree" 
-                className="hover:text-gray-300 transition-colors"
-              >
-                作品
-              </Link>
-              <Link 
-                href="/04-教員紹介" 
-                className="hover:text-gray-300 transition-colors"
-              >
-                教員紹介
-              </Link>
             </div>
           </div>
           
           <div className="hidden md:flex space-x-4">
             <a 
-              href="http://www.sis.otsuma.ac.jp/i-design/" 
+              href="https://otsuma.ac.jp/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="hover:text-gray-300 transition-colors text-sm"
@@ -48,7 +30,7 @@ export default function Navigation() {
               大妻女子大学
             </a>
             <a 
-              href="http://www.sis.otsuma.ac.jp/i-design/" 
+              href="https://sis.otsuma.ac.jp/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="hover:text-gray-300 transition-colors text-sm"
