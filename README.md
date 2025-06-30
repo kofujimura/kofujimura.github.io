@@ -43,15 +43,40 @@ WordPressから移行したNext.js製の静的サイトです。GitHub Pagesで�
 
 記事に画像を含める場合：
 
-1. **外部画像**: 直接URLを使用
+**推奨方法**: 
+1. **新しい記事用画像**: `public/images/`フォルダに配置
+   ```html
+   <img src="/images/your-image.jpg" alt="説明" />
+   ```
+
+2. **WordPressから継承した画像**: 既存の`public/wp-content/uploads/`構造を使用
+   ```html
+   <img src="/wp-content/uploads/2025/01/image.jpg" alt="説明" />
+   ```
+
+3. **外部画像**: 直接URLを使用（CDNや外部サービス）
    ```html
    <img src="https://example.com/image.jpg" alt="説明" />
    ```
 
-2. **ローカル画像**: `public/images/`フォルダに配置
-   ```html
-   <img src="/images/your-image.jpg" alt="説明" />
-   ```
+**画像配置のベストプラクティス**:
+- **新規画像**: `public/images/記事ID/` または `public/images/年月/` に整理して配置
+- **画像最適化**: WebP形式の使用を推奨、適切なサイズにリサイズ
+- **alt属性**: 必ず適切な代替テキストを設定
+- **レスポンシブ対応**: `style="max-width: 100%; height: auto;"` を追加推奨
+
+**例**:
+```html
+<!-- 新しい記事の画像例 -->
+<img src="/images/2025/01/project-screenshot.jpg" 
+     alt="プロジェクトのスクリーンショット" 
+     style="max-width: 100%; height: auto;" />
+
+<!-- WordPress継承画像例 -->
+<img src="/wp-content/uploads/2024/01/existing-image.png" 
+     alt="既存の画像" 
+     style="max-width: 100%; height: auto;" />
+```
 
 ### 3. デプロイ
 
