@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'export',
+  trailingSlash: true,
+  // For GitHub Pages user site (kofujimura.github.io), no basePath needed
+  // If you were using a project site, you would add: basePath: '/repo-name'
   images: {
+    unoptimized: true,
     domains: ['web.fujimura.com', 'qa.fujimura.com'],
     remotePatterns: [
       {

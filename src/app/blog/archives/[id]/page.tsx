@@ -45,7 +45,7 @@ function parseWordPressContent(content: string): string {
     .replace(/<!-- \/wp:image -->/g, '')
     .replace(/<!-- wp:figure[^>]*>/g, '')
     .replace(/<!-- \/wp:figure -->/g, '')
-    .replace(/<figure[^>]*>.*?<\/figure>/gs, (match) => {
+    .replace(/<figure[^>]*>[\s\S]*?<\/figure>/g, (match) => {
       // Check for embedded content like YouTube
       const urlMatch = match.match(/https:\/\/[^\s<]+/);
       if (urlMatch && !match.includes('<img')) {
