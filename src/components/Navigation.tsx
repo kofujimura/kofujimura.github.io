@@ -22,7 +22,7 @@ export default function Navigation() {
           
           <div className="hidden md:flex space-x-4">
             <a 
-              href="https://otsuma.ac.jp/" 
+              href="https://www.otsuma.ac.jp/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="hover:text-gray-300 transition-colors text-sm"
@@ -30,7 +30,7 @@ export default function Navigation() {
               大妻女子大学
             </a>
             <a 
-              href="https://sis.otsuma.ac.jp/" 
+              href="https://www.sis.otsuma.ac.jp/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="hover:text-gray-300 transition-colors text-sm"
