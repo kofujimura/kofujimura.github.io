@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import postsData from '@/data/posts.json';
-import { processWordPressImages } from '@/utils/imageUtils';
+import { processWordPressImages, processYouTubeLinks } from '@/utils/imageUtils';
 
 interface Post {
   id: number;
@@ -57,6 +57,9 @@ function parseWordPressContent(content: string): string {
 
   // Process images
   processed = processWordPressImages(processed);
+  
+  // Process YouTube links
+  processed = processYouTubeLinks(processed);
   
   return processed;
 }
