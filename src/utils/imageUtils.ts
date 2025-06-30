@@ -13,7 +13,7 @@ export function processWordPressImages(content: string): string {
 
         // Handle WordPress uploads
         if (src.includes('wp-content/uploads/')) {
-          // For now, keep original URLs but add loading optimization
+          // URLs are already absolute from the XML data
           return `<img${beforeSrc} src="${src}"${afterSrc} loading="lazy" style="max-width: 100%; height: auto;" />`;
         }
 
