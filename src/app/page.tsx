@@ -14,11 +14,11 @@ interface Post {
   modified: string;
   slug: string;
   status: string;
-  type: string;
+  type?: string;
   author: string;
   categories: string[];
   tags: string[];
-  link: string;
+  link?: string;
   featuredImageId?: number;
   featuredImageUrl?: string;
 }
