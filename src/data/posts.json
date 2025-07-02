@@ -512,57 +512,6 @@
     "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2015/06/soundresponsivetree1.png"
   },
   {
-    "id": 924,
-    "title": "three.jsを使って描いた3D木",
-    "content": "３年生向けの「情報処理応用論及び演習」という授業ではthree.jsを使って３次元空間を作りながらプログラミングを学ぶ授業があります。そのため、最近、three.jsでプログラムを書く機会が増えています。今日は、プログラミングのサンプルとして再帰木(recursive tree)を作成しましたので、ご参考までに本サイトに掲載しておきます。以下の画像をクリックすると別ウインドウで開きます。\n<a href=\"http://web.fujimura.com/ko/tree04.html\" target=\"_blank\" rel=\"noopener noreferrer\"><img class=\"alignleft wp-image-925 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2015/05/fivetrees.png\" alt=\"fivetrees\" width=\"2180\" height=\"1042\" /></a>\n木が５本だと重い場合には、<a href=\"http://web.fujimura.com/ko/tree01.html\" target=\"_blank\" rel=\"noopener noreferrer\">１本のバージョン</a>をご覧下さい。数年前にraphael.jsで作成した2Dバージョンも<a href=\"http://web.fujimura.com/svg/recursive_tree.html\" target=\"_blank\" rel=\"noopener noreferrer\">こちら</a>にあります。",
-    "excerpt": "",
-    "date": "2015-05-31 18:38:37",
-    "modified": "2019-04-09 17:35:18",
-    "slug": "three-js%e3%82%92%e4%bd%bf%e3%81%a3%e3%81%a6%e6%8f%8f%e3%81%84%e3%81%9f3d%e6%9c%a8",
-    "status": "draft",
-    "type": "post",
-    "author": "fujimura",
-    "categories": [
-      "art",
-      "JavaScript",
-      "programming",
-      "web"
-    ],
-    "tags": [
-      "JavaScritp",
-      "recursive tree",
-      "three.js"
-    ],
-    "link": "https://web.fujimura.com/?p=924",
-    "featuredImageId": 925,
-    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2015/05/fivetrees.png"
-  },
-  {
-    "id": 915,
-    "title": "Photo Sphereとthree.js",
-    "content": "Android 4.2以上のスマホには、標準カメラアプリとして、<a href=\"https://www.google.co.jp/intl/ja/maps/about/contribute/photosphere/\">Photo Sphere</a>という上下左右360度の全天球パノラマ写真を撮影できる機能が搭載されているのをご存知でしょうか。私はGWに初めてこの機能を使って「海の公園」で撮影してみました。そして、この写真をthree.jsを使って球体にテクスチャとして貼り付けてみましたところ、以下のように簡単にWebサイト上で全天球パノラマ写真を公開できました（以下の写真をクリック）。Photo Sphereとthree.jsの絶妙な組み合わせです。単に球面写真を貼り付けるだけだと物足りない感じでしたので、中心付近に3DCG女性モデルを配置して回転させています。\n<a href=\"http://web.fujimura.com/ko/uminokouen/runner1.html\"><img class=\"aligncenter wp-image-916 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2015/05/sphere-3Dmodel.png\" alt=\"sphere-3Dmodel\" width=\"1726\" height=\"1208\" /></a>\n大きな球体の両面に写真を貼っているので、内部から見るとビューワになります。遠くまでズームアウトすると球体の外側にも写真が貼り付けているのが分かります。ちなみに撮影者の影が写ってしまったのでPhotoshopで消しました。\n<img class=\"aligncenter wp-image-917 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2015/05/uminokouen.png\" alt=\"uminokouen\" width=\"1594\" height=\"1042\" />\nPhoto SphereはiOSでもGoogleの無料アプリとして公開されておりますので、iPhoneで撮影できます。尚、上記のサイトの閲覧にはChromeかIE11以上が必要です。",
-    "excerpt": "",
-    "date": "2015-05-10 20:01:20",
-    "modified": "2019-04-09 17:41:22",
-    "slug": "photo-sphere%e3%81%a8three-js",
-    "status": "publish",
-    "type": "post",
-    "author": "fujimura",
-    "categories": [
-      "JavaScript",
-      "programming"
-    ],
-    "tags": [
-      "HTML5",
-      "Photo Sphere",
-      "three.js",
-      "全天球パノラマ写真"
-    ],
-    "link": "https://web.fujimura.com/blog/archives/915",
-    "featuredImageId": 916,
-    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2015/05/sphere-3Dmodel.png"
-  },
-  {
     "id": 910,
     "title": "【卒研紹介】2014年度",
     "content": "<p>今年の３月末、当ゼミから9名の第2期生が卒業しました。本日、メディアアート分野の以下の２つの卒業研究について専攻のサイトに紹介の記事を書きましたので、以下をクリックして読んでいただければ幸いです。</p>\n<ul>\n<li><a href=\"http://www.sis.otsuma.ac.jp/i-design/?p=1270\" target=\"_blank\" rel=\"noopener noreferrer\">TwitterとLeap Motionによるジェネラティブ・ミュージックの制作</a></li>\n<li><a href=\"http://www.sis.otsuma.ac.jp/i-design/?p=1296\" target=\"_blank\" rel=\"noopener noreferrer\">リアルタイムに音楽に反応する光のアートの制作</a></li>\n</ul>\n<p><a href=\"http://www.sis.otsuma.ac.jp/i-design/?p=1296\"><img class=\"alignnone wp-image-911 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2015/03/responsivecostume.png\" alt=\"responsivecostume\" width=\"1334\" height=\"896\" /></a></p>\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->",
@@ -767,25 +716,6 @@
     "link": "https://web.fujimura.com/blog/archives/650",
     "featuredImageId": 1116,
     "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2019/04/media-art01.png"
-  },
-  {
-    "id": 636,
-    "title": "ゼミ訪問開始",
-    "content": "先週から２年生のゼミ訪問が開始されました。本ゼミにも多数の訪問がありまして、喜ばしいことです。先日、訪問いただいた学生から指摘されたのですが、ゼミ説明会での私のプレゼンが、「データマイニングと可視化」にフォーカスしすぎて、それ以外のテーマについて、どのようなことをやっているかよく分からなかったとのことでした。確かに、説明時間が5分間ということで、一つのテーマしか説明しなかったことが良くなかったらしいです。\nということで、ここで補足しますが、私のゼミでは、「データマイニングと可視化」だけでははなく、「Webデザイン」と「Webプログラミング」等のWebサイトを作るスキルを身につけることを重視しておりまして、特に３年生の間にWebサイトを構築するための新しい技術を身につけ、それを就活でもアピールしてもらいたいと考えています。そして４年生では、もっと自由にKinectやArudino等のセンサーを使った楽しいメディアアート等や、スマホアプリの制作等のテーマを選んで取り組みます。これらの具体的な内容については、是非、ご訪問下さいね。",
-    "excerpt": "",
-    "date": "2013-11-30 17:28:53",
-    "modified": "2019-04-09 18:26:18",
-    "slug": "%e3%82%bc%e3%83%9f%e8%a8%aa%e5%95%8f%e9%96%8b%e5%a7%8b",
-    "status": "draft",
-    "type": "post",
-    "author": "fujimura",
-    "categories": [
-      "event"
-    ],
-    "tags": [
-      "ゼミ"
-    ],
-    "link": "https://web.fujimura.com/?p=636"
   },
   {
     "id": 632,
