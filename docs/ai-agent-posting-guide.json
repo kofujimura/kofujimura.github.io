@@ -1,0 +1,257 @@
+{
+  "title": "AIエージェント向け記事投稿ガイド",
+  "version": "1.0",
+  "last_updated": "2025-07-04",
+  "description": "AIエージェントが藤村ゼミWebサイトに記事を効率的に投稿するための完全ガイド",
+  
+  "environment": {
+    "working_directory": "/home/fujimura_ko/claude/fujimura-seminar/",
+    "posts_data_file": "src/data/posts.json",
+    "images_directory": "public/images/",
+    "script_path": "scripts/create-post.js"
+  },
+  
+  "quick_start": {
+    "basic_workflow": [
+      "cd /home/fujimura_ko/claude/fujimura-seminar/",
+      "node scripts/create-post.js add-direct '{\"title\":\"記事タイトル\",\"content\":\"<p>記事内容</p>\"}'"
+    ],
+    "with_image_workflow": [
+      "cd /home/fujimura_ko/claude/fujimura-seminar/",
+      "mkdir -p public/images/2025/07/",
+      "# 画像ファイルをpublic/images/2025/07/に配置",
+      "node scripts/create-post.js add-direct '{\"title\":\"記事タイトル\",\"content\":\"<p>記事内容</p><img src=\\\"/images/2025/07/image.jpg\\\" alt=\\\"説明\\\" style=\\\"max-width: 100%; height: auto;\\\" /></p>\",\"featuredImageUrl\":\"/images/2025/07/featured.jpg\"}'"
+    ]
+  },
+  
+  "commands": {
+    "get_next_id": {
+      "command": "node scripts/create-post.js next-id",
+      "description": "次に使用する記事IDを取得する",
+      "output": "数値（例: 1324）"
+    },
+    "add_post_direct": {
+      "command": "node scripts/create-post.js add-direct '<json-string>'",
+      "description": "JSON文字列から直接記事を投稿する",
+      "required_fields": ["title"],
+      "optional_fields": ["content", "excerpt", "categories", "tags", "featuredImageUrl", "slug", "id"],
+      "auto_generated_fields": ["id", "date", "modified", "author", "status"]
+    }
+  },
+  
+  "post_structure": {
+    "required_fields": {
+      "title": {
+        "type": "string",
+        "description": "記事のタイトル",
+        "example": "AIによる記事作成の実験"
+      }
+    },
+    "optional_fields": {
+      "content": {
+        "type": "string",
+        "format": "HTML",
+        "description": "記事の本文（HTML形式）",
+        "example": "<p>記事の内容</p><h2>見出し</h2><p>段落</p>"
+      },
+      "excerpt": {
+        "type": "string",
+        "description": "記事の要約（検索結果やカード表示で使用）",
+        "example": "AIを使った記事作成の実験について説明します"
+      },
+      "categories": {
+        "type": "array",
+        "description": "記事のカテゴリー",
+        "example": ["AI", "技術", "研究"],
+        "default": ["未分類"]
+      },
+      "tags": {
+        "type": "array", 
+        "description": "記事のタグ",
+        "example": ["機械学習", "自動化", "実験"],
+        "default": []
+      },
+      "featuredImageUrl": {
+        "type": "string",
+        "description": "アイキャッチ画像のURL（/images/で始まる相対パス）",
+        "example": "/images/2025/07/featured-image.jpg",
+        "default": ""
+      },
+      "slug": {
+        "type": "string",
+        "description": "URL用のスラッグ（英数字とハイフン）",
+        "example": "ai-article-creation-experiment",
+        "default": "post-{ID}"
+      },
+      "id": {
+        "type": "number",
+        "description": "記事ID（指定しない場合は自動生成）",
+        "note": "通常は自動生成に任せることを推奨"
+      }
+    },
+    "auto_generated_fields": {
+      "date": "投稿日時（ISO 8601形式）",
+      "modified": "更新日時（ISO 8601形式）", 
+      "author": "fujimura（固定値）",
+      "status": "publish（固定値）"
+    }
+  },
+  
+  "image_management": {
+    "directory_structure": {
+      "new_images": "public/images/YYYY/MM/",
+      "wordpress_legacy": "public/wp-content/uploads/YYYY/MM/",
+      "example": "public/images/2025/07/"
+    },
+    "supported_formats": ["jpg", "jpeg", "png", "gif", "webp", "svg"],
+    "upload_workflow": [
+      {
+        "step": 1,
+        "action": "create_directory",
+        "command": "mkdir -p public/images/2025/07/",
+        "description": "画像保存用ディレクトリを作成"
+      },
+      {
+        "step": 2,
+        "action": "save_image",
+        "method": "Write tool with file_path",
+        "path_format": "public/images/2025/07/filename.jpg",
+        "description": "画像ファイルを指定パスに保存"
+      },
+      {
+        "step": 3,
+        "action": "reference_in_content", 
+        "html_format": "<img src=\"/images/2025/07/filename.jpg\" alt=\"画像の説明\" style=\"max-width: 100%; height: auto;\" />",
+        "description": "記事内で画像を参照"
+      }
+    ],
+    "featured_image": {
+      "description": "記事のアイキャッチ画像（カード表示やSNSシェア時に使用）",
+      "field": "featuredImageUrl",
+      "format": "/images/2025/07/featured.jpg",
+      "recommended_size": "1200x630px（SNSシェア用）"
+    }
+  },
+  
+  "html_content_guidelines": {
+    "basic_structure": {
+      "paragraphs": "<p>段落の内容</p>",
+      "headings": {
+        "h2": "<h2>主要な見出し</h2>",
+        "h3": "<h3>小見出し</h3>"
+      },
+      "lists": {
+        "unordered": "<ul><li>項目1</li><li>項目2</li></ul>",
+        "ordered": "<ol><li>項目1</li><li>項目2</li></ol>"
+      },
+      "links": "<a href=\"https://example.com\">リンクテキスト</a>",
+      "emphasis": "<strong>強調</strong>、<em>斜体</em>"
+    },
+    "images": {
+      "basic": "<img src=\"/images/2025/07/image.jpg\" alt=\"説明\" style=\"max-width: 100%; height: auto;\" />",
+      "with_caption": "<figure><img src=\"/images/2025/07/image.jpg\" alt=\"説明\" style=\"max-width: 100%; height: auto;\" /><figcaption>画像の説明文</figcaption></figure>"
+    },
+    "styling": {
+      "responsive_images": "style=\"max-width: 100%; height: auto;\"を必ず追加",
+      "accessibility": "alt属性を必ず設定",
+      "performance": "適切なファイルサイズとフォーマットを選択"
+    }
+  },
+  
+  "examples": {
+    "minimal_post": {
+      "description": "最小限の記事投稿例",
+      "command": "node scripts/create-post.js add-direct '{\"title\":\"テスト記事\",\"content\":\"<p>これはテスト記事です。</p>\"}'"
+    },
+    "full_post": {
+      "description": "全フィールドを指定した記事投稿例",
+      "command": "node scripts/create-post.js add-direct '{\"title\":\"AI技術の最新動向\",\"content\":\"<p>AI技術の発展について解説します。</p><h2>機械学習の進歩</h2><p>機械学習技術は...</p><img src=\\\"/images/2025/07/ai-chart.jpg\\\" alt=\\\"AI技術の発展チャート\\\" style=\\\"max-width: 100%; height: auto;\\\" />\",\"excerpt\":\"AI技術の最新動向と機械学習の進歩について詳しく解説\",\"categories\":[\"AI\",\"技術\"],\"tags\":[\"機械学習\",\"深層学習\",\"最新技術\"],\"featuredImageUrl\":\"/images/2025/07/ai-featured.jpg\"}'"
+    },
+    "post_with_multiple_images": {
+      "description": "複数画像を含む記事の例",
+      "command": "node scripts/create-post.js add-direct '{\"title\":\"研究成果報告\",\"content\":\"<p>研究の概要</p><img src=\\\"/images/2025/07/research-overview.jpg\\\" alt=\\\"研究概要図\\\" style=\\\"max-width: 100%; height: auto;\\\" /><h2>実験結果</h2><p>実験の結果は以下の通りです。</p><img src=\\\"/images/2025/07/experiment-results.jpg\\\" alt=\\\"実験結果グラフ\\\" style=\\\"max-width: 100%; height: auto;\\\" />\",\"featuredImageUrl\":\"/images/2025/07/research-featured.jpg\"}'"
+    }
+  },
+  
+  "best_practices": {
+    "content_creation": [
+      "記事タイトルは具体的で検索しやすいものにする",
+      "excerptは150文字以内で記事の要点を伝える",
+      "HTML構造は適切にネストする（h2→h3の順序を守る）",
+      "画像には必ずalt属性を設定する",
+      "レスポンシブ対応のため画像にstyle=\"max-width: 100%; height: auto;\"を追加する"
+    ],
+    "image_handling": [
+      "画像ファイル名は英数字とハイフンのみ使用",
+      "ファイルサイズは1MB以下に最適化",
+      "アイキャッチ画像は1200x630pxサイズを推奨",
+      "適切な画像フォーマット（写真:jpg, イラスト:png）を選択"
+    ],
+    "categorization": [
+      "既存カテゴリーを確認してから新規カテゴリーを作成",
+      "タグは記事の内容を的確に表すキーワードを選択",
+      "カテゴリーは3個まで、タグは5個までに制限することを推奨"
+    ]
+  },
+  
+  "common_workflows": {
+    "text_only_post": {
+      "steps": [
+        "cd /home/fujimura_ko/claude/fujimura-seminar/",
+        "node scripts/create-post.js add-direct '{\"title\":\"記事タイトル\",\"content\":\"<p>記事内容</p>\",\"excerpt\":\"要約\",\"categories\":[\"カテゴリー\"]}'"
+      ]
+    },
+    "post_with_single_image": {
+      "steps": [
+        "cd /home/fujimura_ko/claude/fujimura-seminar/",
+        "mkdir -p public/images/2025/07/",
+        "# Write tool で画像を public/images/2025/07/image.jpg に保存",
+        "node scripts/create-post.js add-direct '{\"title\":\"記事タイトル\",\"content\":\"<p>記事内容</p><img src=\\\"/images/2025/07/image.jpg\\\" alt=\\\"説明\\\" style=\\\"max-width: 100%; height: auto;\\\" />\",\"featuredImageUrl\":\"/images/2025/07/image.jpg\"}'"
+      ]
+    },
+    "post_with_featured_image": {
+      "steps": [
+        "cd /home/fujimura_ko/claude/fujimura-seminar/",
+        "mkdir -p public/images/2025/07/",
+        "# Write tool でアイキャッチ画像を public/images/2025/07/featured.jpg に保存",
+        "node scripts/create-post.js add-direct '{\"title\":\"記事タイトル\",\"content\":\"<p>記事内容</p>\",\"featuredImageUrl\":\"/images/2025/07/featured.jpg\"}'"
+      ]
+    }
+  },
+  
+  "error_handling": {
+    "duplicate_id": {
+      "error": "Error: ID XXX は既に存在します",
+      "solution": "IDを指定せずに自動生成に任せる、または異なるIDを指定"
+    },
+    "missing_title": {
+      "error": "Error: postDataにidとtitleが必要です",
+      "solution": "titleフィールドを必ず含める"
+    },
+    "json_parse_error": {
+      "error": "Error parsing JSON",
+      "solution": "JSON文字列の構文を確認（引用符のエスケープなど）"
+    },
+    "file_not_found": {
+      "error": "画像ファイルが見つからない",
+      "solution": "ディレクトリ作成とファイル保存を確認"
+    }
+  },
+  
+  "validation_checklist": [
+    "✅ 作業ディレクトリに移動済み",
+    "✅ 必要に応じて画像ディレクトリを作成済み", 
+    "✅ 画像ファイルを適切なパスに保存済み",
+    "✅ JSON文字列の構文が正しい",
+    "✅ titleフィールドが含まれている",
+    "✅ 画像パスが正しく設定されている",
+    "✅ alt属性とstyle属性が画像タグに含まれている"
+  ],
+  
+  "notes": {
+    "deployment": "記事投稿後は自動でGitHub Actionsによりサイトが更新されます",
+    "display_order": "記事は日付順（新しい順）で表示されます。IDの大小は表示順序に影響しません",
+    "backup": "重要な変更前にはgit branchでバックアップを作成することを推奨",
+    "testing": "本番投稿前にテスト記事で動作確認することを推奨"
+  }
+}
