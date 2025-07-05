@@ -248,10 +248,52 @@
     "✅ alt属性とstyle属性が画像タグに含まれている"
   ],
   
+  "git_operations": {
+    "description": "記事投稿後は変更をGitHubにコミット・プッシュしてサイトを更新する必要があります",
+    "workflow": [
+      {
+        "step": 1,
+        "action": "stage_changes",
+        "command": "git add src/data/posts.json public/images/[画像ファイル]",
+        "description": "変更されたファイルをステージングエリアに追加"
+      },
+      {
+        "step": 2,
+        "action": "commit_changes", 
+        "command": "git commit -m \"記事タイトル追加\\n\\n🤖 Generated with [Claude Code](https://claude.ai/code)\\n\\nCo-Authored-By: Claude <noreply@anthropic.com>\"",
+        "description": "変更をローカルリポジトリにコミット"
+      },
+      {
+        "step": 3,
+        "action": "push_to_github",
+        "command": "git push https://$GITHUB_TOKEN@github.com/kofujimura/kofujimura.github.io.git main",
+        "description": "認証トークンを使用してGitHubにプッシュ"
+      }
+    ],
+    "authentication": {
+      "method": "Personal Access Token",
+      "environment_variable": "GITHUB_TOKEN",
+      "setup_note": "環境変数GITHUB_TOKENに有効なPersonal Access Tokenが設定されている必要があります",
+      "token_verification": "echo $GITHUB_TOKEN で確認可能",
+      "push_format": "git push https://$GITHUB_TOKEN@github.com/[username]/[repository].git [branch]"
+    },
+    "troubleshooting": {
+      "authentication_failed": {
+        "error": "fatal: could not read Username for 'https://github.com': No such device or address",
+        "solution": "環境変数GITHUB_TOKENが設定されているか確認し、認証トークン付きのURL形式でプッシュ"
+      },
+      "no_upstream": {
+        "error": "fatal: The current branch main has no upstream branch",
+        "solution": "git push --set-upstream origin main または認証トークン付きURLで直接プッシュ"
+      }
+    }
+  },
+
   "notes": {
     "deployment": "記事投稿後は自動でGitHub Actionsによりサイトが更新されます",
     "display_order": "記事は日付順（新しい順）で表示されます。IDの大小は表示順序に影響しません",
     "backup": "重要な変更前にはgit branchでバックアップを作成することを推奨",
-    "testing": "本番投稿前にテスト記事で動作確認することを推奨"
+    "testing": "本番投稿前にテスト記事で動作確認することを推奨",
+    "git_required": "記事投稿後は必ずgit commit & pushを実行してサイトを更新してください"
   }
 }
