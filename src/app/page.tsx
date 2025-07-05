@@ -40,7 +40,7 @@ function extractPlainText(html: string): string {
     .replace(/<[^>]*>/g, '')
     .replace(/&[^;]+;/g, ' ')
     .trim()
-    .substring(0, 150) + '...';
+    .substring(0, 120) + '...';
 }
 
 export default function Home() {
@@ -81,28 +81,40 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50">
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {displayedPosts.map((post) => (
             <article
               key={post.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-100"
             >
+              {/* Category Label */}
+              {post.categories.length > 0 && (
+                <div className="px-4 pt-4 pb-2">
+                  <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">
+                    {post.categories[0]}
+                  </span>
+                </div>
+              )}
+              
+              {/* Image */}
               {post.featuredImageUrl && (
-                <div className="aspect-video overflow-hidden relative">
+                <div className="aspect-[4/3] overflow-hidden relative mx-4 mb-4 rounded-lg">
                   <Image
                     src={post.featuredImageUrl}
                     alt={post.title}
                     fill
-                    className="object-cover hover:scale-105 transition-transform duration-300"
+                    className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
               )}
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">
+              
+              {/* Content */}
+              <div className="px-4 pb-4">
+                <h2 className="text-lg font-bold text-gray-900 mb-2 leading-snug">
                   <Link 
                     href={`/blog/archives/${post.id}`}
                     className="hover:text-blue-600 transition-colors"
@@ -111,28 +123,13 @@ export default function Home() {
                   </Link>
                 </h2>
                 
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed">
                   {extractPlainText(post.content)}
                 </p>
                 
-                <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-4">
+                <div className="flex items-center text-xs text-gray-500">
                   <time dateTime={post.date}>{formatDate(post.date)}</time>
-                  <span>•</span>
-                  <span>{post.author}</span>
                 </div>
-                
-                {post.categories.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {post.categories.map((category) => (
-                      <span
-                        key={category}
-                        className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
-                      >
-                        {category}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
             </article>
           ))}
@@ -149,7 +146,7 @@ export default function Home() {
           <div className="flex justify-center mt-8">
             <button
               onClick={handleLoadMore}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors duration-300 border border-gray-200 font-medium"
             >
               さらに読み込む ({Math.min(POSTS_PER_PAGE, posts.length - currentPage * POSTS_PER_PAGE)}件)
             </button>
