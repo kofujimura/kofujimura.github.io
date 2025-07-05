@@ -28,6 +28,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      <head>
+        <link rel="alternate" type="application/json" href="https://web.fujimura.com/posts.json" title="Fujimura Seminar JSON Feed" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
