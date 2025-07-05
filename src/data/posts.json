@@ -184,7 +184,9 @@
     "type": "post",
     "author": "ko",
     "categories": [
-      "未分類"
+      "卒業研究",
+      "発表会",
+      "AI"
     ],
     "tags": [
       "卒業研究"
@@ -232,7 +234,8 @@
     "type": "post",
     "author": "ko",
     "categories": [
-      "未分類"
+      "卒業研究",
+      "発表会"
     ],
     "tags": [],
     "link": "https://web.fujimura.com/blog/archives/1267",
@@ -251,7 +254,9 @@
     "type": "post",
     "author": "ko",
     "categories": [
-      "未分類"
+      "event",
+      "media art",
+      "programming"
     ],
     "tags": [
       "Dust Sensor",
@@ -276,7 +281,8 @@
     "type": "post",
     "author": "ko",
     "categories": [
-      "未分類"
+      "卒業研究",
+      "発表会"
     ],
     "tags": [],
     "link": "https://web.fujimura.com/blog/archives/1240",
@@ -295,7 +301,8 @@
     "type": "post",
     "author": "ko",
     "categories": [
-      "未分類"
+      "卒業研究",
+      "発表会"
     ],
     "tags": [
       "卒業制作"
@@ -348,7 +355,8 @@
     "categories": [
       "media art",
       "programming",
-      "未分類"
+      "卒業研究",
+      "発表会"
     ],
     "tags": [
       "dance",
@@ -514,7 +522,9 @@
     "type": "post",
     "author": "fujimura",
     "categories": [
-      "未分類"
+      "event",
+      "programming",
+      "web"
     ],
     "tags": [],
     "link": "https://web.fujimura.com/blog/archives/944",
@@ -618,28 +628,6 @@
     "link": "https://web.fujimura.com/blog/archives/880",
     "featuredImageId": 1109,
     "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2019/04/twittermusic.png"
-  },
-  {
-    "id": 863,
-    "title": "【ゼミ発表の紹介】　JavaScriptでアナログクロックを作ろう",
-    "content": "３年生のゼミ（前期）での発表については、<a href=\"http://web.fujimura.com/blog/archives/830\">こちら</a>のエントリでも紹介しましたが、今日はもう一件アップします。作品はJavaScriptで制作されたアナログクロックで、以下のものになります。\n<iframe width=\"520\" height=\"520\" scrolling=\"no\" src=\"http://web.fujimura.com/zemi/ac/AnalogueClock.html\"></iframe>\n<a href=\"http://web.fujimura.com/zemi/analogclock.html\" target=\"_blank\" rel=\"noopener noreferrer\"><img class=\"alignright wp-image-872 size-medium\" src=\"https://qa.fujimura.com/wp-content/uploads/2014/10/analogclock-300x190.png\" alt=\"analogclock\" width=\"300\" height=\"190\" /></a>実はこれは１年前に作った作品で、現在の４年生のM.I.さんが３年生のときに制作したものですが、たいへん完成度が高く、制作過程を丁寧にスライドで説明していただきいてありますので、他の学生にも参考になります。スライドは以下の画面をクリックすると始まります。HTML5対応のブラウザでご覧下さい。右矢印キー（又はフリック）でスライドが進みます。",
-    "excerpt": "",
-    "date": "2014-10-17 12:07:42",
-    "modified": "2019-04-09 18:08:32",
-    "slug": "%e3%80%90%e3%82%bc%e3%83%9f%e7%99%ba%e8%a1%a8%e3%81%ae%e7%b4%b9%e4%bb%8b%e3%80%91%e3%80%80javascript%e3%81%a7%e3%82%a2%e3%83%8a%e3%83%ad%e3%82%b0%e3%82%af%e3%83%ad%e3%83%83%e3%82%af%e3%82%92%e4%bd%9c",
-    "status": "draft",
-    "type": "post",
-    "author": "fujimura",
-    "categories": [
-      "JavaScript",
-      "programming",
-      "未分類"
-    ],
-    "tags": [
-      "３年生",
-      "ゼミ"
-    ],
-    "link": "https://web.fujimura.com/?p=863"
   },
   {
     "id": 846,
@@ -791,7 +779,7 @@
     "type": "post",
     "author": "fujimura",
     "categories": [
-      "未分類"
+      "卒業研究"
     ],
     "tags": [
       "ゼミ",
@@ -1097,109 +1085,6 @@
     "link": "https://web.fujimura.com/blog/archives/203",
     "featuredImageId": 209,
     "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/02/generative_art.jpg"
-  },
-  {
-    "id": 182,
-    "title": "２次元と３次元の狭間で",
-    "content": "最近、２次元の世界を３次元化する表現手法をよく見かける気がします。例えば、書道家、雪舟さんとチームラボの制作の<a href=\"http://www.nhk.or.jp/tsubo/shoka.html\">NHK「美の壷」のオープニングタイトル</a>や、朝ドラの「純と愛」のオープニングタイトル等です。これらの作品は一旦３次元モデルが作られ、カメラワークにより再２次元化あるいは映像化されています。\nここで面白いのは、この過程で作られる３次元モデルが２次元のオリジナルコンテンツを生かしてモデリングされていることです。つまり、３次元空間に配置されるオブジェクトのそれぞれは「紙ペラ」のような表現であり、紙ペラを３次元空間に配置することで３次元表現していることだと思います。もともとのコンテンツが２次元ですので、３次元化が容易であるという技術的な背景もあるとは思いますが、この手法はオリジナルの２次元コンテンツの良さを保持したまま、さらに動きのある面白い作品にできるということがその魅力だと思います。\n私はこのような２次元と３次元の中間のメディアに関心を持っています。完全な３次元は、人間はリアルの現実として体験しており、コンピュータ上でも3DCGは長い歴史がある分野だと思います。また、２次元の世界も太古の昔から絵画として存在し、コンピュータ上でもディスプレイは本質的に２次元ですので、様々な2DCG作品が作られてきました。一方、このような２次元と３次元の中間はどうでしょうか。\n<a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/shadowbox1.jpg\"><img class=\"size-medium wp-image-192 alignright\" title=\"shadowbox1\" src=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/shadowbox1-225x300.jpg\" alt=\"\" width=\"225\" height=\"300\" /></a>\nリアルな「紙ペラ」の重ね合わせの手法は、17世紀にヨーロッパで流行した「シャドウボックス」とよぶ工芸があり、実は、うちの玄関にも家内が作ったシャドウボックス作品があります（右）。とはいえ、物理的制約からたいへん手間のかかるこれらの作品は、まだマイナーな分野だったと思います。また、これをコンピュータ上で実現する場合も、これまではそのためのツールがなく、技術的な敷居が高く、プログラミングができないアーティストは手を出し難い分野だったのではないでしょうか。\n近年のWebブラウザの性能向上とjQuery等のJavaScriptライブラリの爆発的な広がりにより、今後、２次元以上３次元未満のいゆる「2.X次元」のアート作品が今後広がりを見せると思います。2.Xといったとき、そのXには様々なレベルや切り口が考えられ、新しいアイデアをとりいれる無限の可能性を感じます。これは、完全な３次元（3DCG）を超える可能性もあると思います。今後、私や本ゼミのテーマとしてこのような分野に取り組んで行きたいと思っています。昨年、うちの学生がつくった本サイトの<a href=\"http://web.fujimura.com/ko/jmpress/members03.html#/members\">ゼミメンバのページ（IEやスマホでは動きません）</a>も2.X次元表現の一例です。\n今週末、六本木ヒルズのスカイギャラリーでチームラボの以下の作品が公開されているそうです。チームラボの技術力で古典アートを見事に2.X次元化したものだと思います。\n<p style=\"text-align: center;\"><a href=\"http://www.team-lab.net/portfolio-exhibition/ball-exhibition/mat2013.html\"><img src=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/FandC_hakuraku_hiki_R.jpg\" alt=\"\" /></a></p>\n<a href=\"http://www.team-lab.net/portfolio-exhibition/ball-exhibition/mat2013.html\">MEDIA AMBITION TOKYO | teamLab / チームラボ</a>.\n本日、２１時までか...",
-    "excerpt": "",
-    "date": "2013-02-17 13:14:44",
-    "modified": "2019-04-09 18:30:23",
-    "slug": "2_3dimention",
-    "status": "draft",
-    "type": "post",
-    "author": "fujimura",
-    "categories": [
-      "media art"
-    ],
-    "tags": [
-      "2.X次元",
-      "シャドウボックス"
-    ],
-    "link": "https://web.fujimura.com/?p=182"
-  },
-  {
-    "id": 170,
-    "title": "クラウド環境でのサーバ障害と復旧",
-    "content": "<!-- wp:image {\"id\":172,\"align\":\"center\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/02/EC2_notification.png\" alt=\"\" class=\"wp-image-172\"/></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>昨日、このサイトのウェブサーバがダウンしていることに気がつきました。もしかしたら、最近サーバで動かしはじめたソフトに問題があったのかと思いましたが、このサイトを動かしているAmazon EC2から以下のようなメールが届いておりました。内容は「サーバの仮想マシンのインスタンスを2/19日までに削除するので、仮想サーバのStop/Startを実行して欲しい」との事でした。このような通知は、主にハードウェアの障害で来るみたいです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>早速、サーバの停止と再実行しましたところ、無事、新しいインスタンスに切り替わりました。これにより、新しいハードウェア上で動くようになるらしいです。そして、新しいインスタンスにIPアドレスを割り当てて、作業終了</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Amazon EC2を使って９ヶ月目で初めて遭遇したハード故障、仮想マシン環境でも遭遇するのですね（あたりまえか）。それにしても、もし自分でハードを購入し運用していたら、ハードの購入、差し替え、OSのインストール、バックアップリストア...という大変な作業が必要だったわけで、これが数クリックで終了とはクラウドの便利さを改めて体感した次第です。<a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/EC2_notification.png\"><br></a></p>\n<!-- /wp:paragraph -->",
-    "excerpt": "",
-    "date": "2013-02-16 15:05:32",
-    "modified": "2019-04-10 19:05:29",
-    "slug": "170",
-    "status": "publish",
-    "type": "post",
-    "author": "fujimura",
-    "categories": [
-      "web"
-    ],
-    "tags": [
-      "AWS",
-      "ec2",
-      "server"
-    ],
-    "link": "https://web.fujimura.com/blog/archives/170",
-    "featuredImageId": 172,
-    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/02/EC2_notification.png"
-  },
-  {
-    "id": 146,
-    "title": "白川先生の最終講義",
-    "content": "本日、本年度をもって退職される社会情報学部情報デザイン専攻の白川先生の最終講義が行われました。講義は過去を振り返るというよりも、現在進行中の研究のお話が中心で、これからの研究意欲を強く感じる内容であり、たいへん参考になりました。ありがとうございました。\n<a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/shirakawa_s.jpg\"><img class=\"alignleft size-medium wp-image-147\" title=\"shirakawa_s\" src=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/shirakawa_s-300x225.jpg\" alt=\"\" width=\"300\" height=\"225\" /></a>",
-    "excerpt": "",
-    "date": "2013-02-15 15:47:42",
-    "modified": "2019-04-09 18:30:01",
-    "slug": "%e7%99%bd%e5%b7%9d%e5%85%88%e7%94%9f%e3%81%ae%e6%9c%80%e7%b5%82%e8%ac%9b%e7%be%a9",
-    "status": "draft",
-    "type": "post",
-    "author": "fujimura",
-    "categories": [
-      "未分類"
-    ],
-    "tags": [],
-    "link": "https://web.fujimura.com/?p=146"
-  },
-  {
-    "id": 138,
-    "title": "「気になるゼミをチェック」に掲載されました",
-    "content": "<!-- wp:image {\"id\":139,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://www.sis.otsuma.ac.jp/jouhou/jouhou-fujimura/3866/\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/02/zemi-20130214.png\" alt=\"\" class=\"wp-image-139\"/></a><figcaption>大妻HP</figcaption></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>大妻女子大学の公式サイトで連載の「気になるゼミをチェック」にようやく当ゼミの紹介がアップされました。以下の画像をクリックするとそのページに移動します。タイムリーな内容を紹介するには、このゼミのサイトの方がいいですね。<br></p>\n<!-- /wp:paragraph -->",
-    "excerpt": "",
-    "date": "2013-02-15 12:19:25",
-    "modified": "2019-04-10 19:03:58",
-    "slug": "%e3%80%8c%e6%b0%97%e3%81%ab%e3%81%aa%e3%82%8b%e3%82%bc%e3%83%9f%e3%82%92%e3%83%81%e3%82%a7%e3%83%83%e3%82%af%e3%80%8d%e3%81%ab%e6%8e%b2%e8%bc%89%e3%81%95%e3%82%8c%e3%81%be%e3%81%97%e3%81%9f",
-    "status": "publish",
-    "type": "post",
-    "author": "fujimura",
-    "categories": [
-      "未分類"
-    ],
-    "tags": [
-      "ゼミ"
-    ],
-    "link": "https://web.fujimura.com/blog/archives/138",
-    "featuredImageId": 139,
-    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/02/zemi-20130214.png"
-  },
-  {
-    "id": 127,
-    "title": "Crayon syntax hilighterインストールしてみました",
-    "content": "WordPressにCrayon Syntax Highlighterと呼ぶ、ソースコードをきれいに表示するプラグインをインストールしてみました。\nJavaScriptソースの表示例です：\n<pre class=\"lang:js decode:true\" title=\"Recursive tree\">// SVG Recursive Tree using raphael.js\nwindow.onload = function () {\nvar paper = Raphael(\"holder\", 800, 600);\n// Definition of branch shapes.\nvar BRANCH_LENGTH = 100;\nRaphael.fn.branch = function (x, y, scale, rotate) {\n\treturn this.path(\n\"M-7.3-21.2c0.6-8.9,1.7-56.7,1.3-79.4c-0.3-21.6-0.6-86.3,0.6-95.8c1.1-9.2,13.2-8,13.2-0.4c0,12.4-1.1,57.3-2.2,72.1c-1.1,15-0.1,53.5,0.6,61.2C7-56.5,7.1-29.5,8.1-20.2c0.7,7.2,4,17.1,1.8,22.6C7.7,7.8-5.7,8-9,4C-13.2-1.1-8.1-8.8-7.3-21.2z\").attr({fill:\"#181b12\", stroke:\"#ffffff\", 'stroke-width':0.1}).transform(\"t\" + x +\",\" + y).scale(scale,scale,0,0).rotate(rotate,0,0);\n}\n// Definition of leaf shapes.\nvar leaf_style = [\"#4e724c\",\"#9eb296\",\"#5e7153\",\"#142a1e\",\"#2f563b\",\"#244f33\"];\nRaphael.fn.leaf = function (x, y, scale, rotate) {\n\treturn this.path(\"M-4.6-3.7C-8.2-6.2-23-16-23.8-25.2s1.2-15.1,11.1-27.6s8.1-27.8,8.1-27.8s3.1,17.3,13.2,27.8c7.7,8.1,21.2,18.7,17.6,26C21.8-17.9,16-18.3,6.4-7.3C-0.7,0.9,1,5.5,1,5.5S-0.9-1.1-4.6-3.7z\").attr({fill:leaf_style[Math.floor(Math.random()*6)], stroke:\"#ffffff\",'stroke-width':0.1}).transform(\"t\" + x +\",\" + y).scale(scale,scale,0,0).rotate(rotate,0,0);\n}\nfunction tree(x,y,scale,rotate,depth) {\n\tif (scale &lt; 0.02 || depth &gt; 10) {\n\t\tpaper.leaf(x, y, scale, Math.floor(180*Math.random()));\n\t\tpaper.leaf(x, y, scale, Math.floor(180*Math.random()));\n\t\treturn 0;\n\t} else {\n\t\tvar scale1 = 1 - Math.exp(-0.02 * Math.min(y-1.5*x+500,y+1.5*x-700));\n\t\tif (s1&lt;0) s1=0;\n\t\tscale = scale * scale1;\n\t\tvar s1 = scale * (0.5 + 0.6 * Math.random()); // Growth ratio of right branch\n\t\tvar s2 = scale * (0.5 + 0.6 * Math.random()); // Growth ratio of left branch\n\t\tvar r1 = rotate + Math.random()*30 + depth; // Rotation of right branch\n\t\tvar r2 = rotate - Math.random()*30 - depth; // Rotation of left branch\n\t\tvar x1 = x + s1 * BRANCH_LENGTH * Math.sin(r1 * Math.PI / 180.0);\n\t\tvar y1 = y - s1 * BRANCH_LENGTH * Math.cos(r1 * Math.PI / 180.0);\n\t\tvar x2 = x + s2 * BRANCH_LENGTH * Math.sin(r2 * Math.PI / 180.0);\n\t\tvar y2 = y - s2 * BRANCH_LENGTH * Math.cos(r2 * Math.PI / 180.0);\n\t\tdepth++;\n\t\tpaper.branch(x, y, 0.5*s1, r1).animate({opacity:1.0},0,function () {tree(x1, y1, s1, r1, depth);});\n\t\t// Next level of right branch\n\t\tpaper.branch(x, y, 0.5*s2, r2).animate({opacity:1.0},0,function () {tree(x2, y2, s2, r2, depth);});\n\t\t// Next level of left branch\n\t}\n}\npaper.rect(0.0, 0.0, 800, 600).attr({fill:\"90-#ffcccc:10-#88bbbb:60\",stroke:\"ffffff\",'stroke-width':0.5});\npaper.rect(0.0, 500, 800, 100).attr({fill:\"90-#222222:10-#43545b:60\",stroke:\"ffffff\",'stroke-width':0.5});\npaper.branch(400,500,0.25,0);\ntree(400, 450, 0.5, 0, 0);\n}\n</pre>",
-    "excerpt": "",
-    "date": "2013-02-14 14:39:17",
-    "modified": "2013-02-14 14:39:17",
-    "slug": "rayon-syntax-hightliter",
-    "status": "pending",
-    "type": "post",
-    "author": "fujimura",
-    "categories": [
-      "web",
-      "wordpress"
-    ],
-    "tags": [
-      "plugin",
-      "source code",
-      "wordpress"
-    ],
-    "link": "https://web.fujimura.com/?p=127"
   },
   {
     "id": 958,
