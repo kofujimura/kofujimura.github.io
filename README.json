@@ -1,0 +1,108 @@
+{
+  "project": {
+    "name": "kofujimura.github.io",
+    "description": "Next.js製の静的サイト（ヘッドレスCMS）",
+    "type": "website",
+    "tech_stack": ["Next.js 15", "TypeScript", "Tailwind CSS"],
+    "hosting": "GitHub Pages",
+    "deployment": "GitHub Actions",
+    "url": "https://kofujimura.github.io/"
+  },
+  "ai_agent_info": {
+    "purpose": "記事投稿とサイト管理の自動化",
+    "capabilities": [
+      "記事作成・投稿",
+      "画像管理",
+      "デプロイメント",
+      "コンテンツ管理"
+    ],
+    "context_understanding": {
+      "cms_type": "headless",
+      "data_storage": "JSON files",
+      "content_format": "HTML in JSON"
+    }
+  },
+  "file_structure": {
+    "content_data": {
+      "posts": "src/data/posts.json",
+      "pages": "src/data/pages.json",
+      "attachments": "src/data/attachments.json"
+    },
+    "scripts": {
+      "create_post": "scripts/create-post.js",
+      "get_next_id": "scripts/get-next-id.js",
+      "migrate_images": "scripts/migrate-images.js"
+    },
+    "assets": {
+      "new_images": "public/images/",
+      "legacy_images": "public/wp-content/uploads/"
+    }
+  },
+  "operations": {
+    "post_creation": {
+      "method": "script",
+      "command": "node scripts/create-post.js add-direct",
+      "input_format": "JSON string",
+      "required_fields": ["title", "content"],
+      "optional_fields": ["categories", "tags", "featuredImageUrl", "excerpt"],
+      "auto_generated": ["id", "date", "slug"]
+    },
+    "deployment": {
+      "trigger": "git push to main branch",
+      "automation": "GitHub Actions",
+      "duration": "2-3 minutes",
+      "git_workflow": [
+        "git add .",
+        "git commit -m 'message'",
+        "git push origin main"
+      ]
+    }
+  },
+  "data_schemas": {
+    "post": {
+      "id": "number (auto-generated)",
+      "title": "string (required)",
+      "content": "string (HTML, required)",
+      "excerpt": "string (optional)",
+      "date": "string (ISO 8601, auto-generated)",
+      "modified": "string (ISO 8601, auto-generated)",
+      "slug": "string (auto-generated)",
+      "status": "string (default: 'publish')",
+      "author": "string (default: 'fujimura')",
+      "categories": "array of strings",
+      "tags": "array of strings",
+      "featuredImageUrl": "string (URL, optional)"
+    }
+  },
+  "ai_workflows": {
+    "quick_post": {
+      "description": "AIエージェント向けの最速投稿方法",
+      "steps": [
+        "create-post.js add-direct でJSON投稿",
+        "git操作でデプロイ"
+      ],
+      "example_command": "node scripts/create-post.js add-direct '{\"title\":\"AI記事\",\"content\":\"<p>内容</p>\"}'"
+    },
+    "image_handling": {
+      "upload_location": "public/images/",
+      "reference_format": "/images/filename.jpg",
+      "optimization": "WebP推奨、適切なサイズにリサイズ"
+    }
+  },
+  "limitations": {
+    "github_api": "API rate limits apply",
+    "file_size": "GitHub file size limits",
+    "deployment": "GitHub Actions usage limits"
+  },
+  "troubleshooting": {
+    "build_failure": "Check GitHub Actions logs",
+    "deployment_delay": "Wait 2-3 minutes for GitHub Pages",
+    "json_syntax": "Validate JSON before commit"
+  },
+  "meta": {
+    "version": "1.0",
+    "last_updated": "2025-07-08",
+    "ai_context_preserved": true,
+    "human_readable_docs": "README.md"
+  }
+}
