@@ -43,8 +43,10 @@
       "method": "script",
       "command": "node scripts/create-post.js add-direct",
       "input_format": "JSON string",
-      "required_fields": ["title", "content"],
-      "optional_fields": ["categories", "tags", "featuredImageUrl", "excerpt"],
+      "data_handling": "既存posts.jsonに新記事を追記（上書きしない）",
+      "safety_features": ["ID重複チェック", "既存データ保護", "配列先頭への追記"],
+      "required_fields": ["title"],
+      "optional_fields": ["content", "categories", "tags", "featuredImageUrl", "excerpt"],
       "auto_generated": ["id", "date", "slug"]
     },
     "deployment": {
@@ -76,12 +78,14 @@
   },
   "ai_workflows": {
     "quick_post": {
-      "description": "AIエージェント向けの最速投稿方法",
+      "description": "AIエージェント向けの最速投稿方法（既存記事を保持して追記）",
       "steps": [
-        "create-post.js add-direct でJSON投稿",
+        "create-post.js add-direct でJSON投稿（既存データに追記）",
         "git操作でデプロイ"
       ],
-      "example_command": "node scripts/create-post.js add-direct '{\"title\":\"AI記事\",\"content\":\"<p>内容</p>\"}'"
+      "example_command": "node scripts/create-post.js add-direct '{\"title\":\"AI記事\",\"content\":\"<p>内容</p>\"}'',
+      "note": "既存記事を保持しつつ新記事を配列先頭に追加",
+      "warning": "posts.jsonファイル全体を上書きせず、既存データに追記処理を行う"
     },
     "image_handling": {
       "upload_location": "public/images/",
@@ -97,12 +101,14 @@
   "troubleshooting": {
     "build_failure": "Check GitHub Actions logs",
     "deployment_delay": "Wait 2-3 minutes for GitHub Pages",
-    "json_syntax": "Validate JSON before commit"
+    "json_syntax": "Validate JSON before commit",
+    "data_loss_prevention": "add-directコマンドは既存データを保護し追記のみ実行"
   },
   "meta": {
-    "version": "1.0",
-    "last_updated": "2025-07-08",
+    "version": "1.1",
+    "last_updated": "2025-07-19",
     "ai_context_preserved": true,
-    "human_readable_docs": "README.md"
+    "human_readable_docs": "README.md",
+    "changelog": "v1.1: データ保護とAgent誤解防止のための記載を明確化"
   }
 }
