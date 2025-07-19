@@ -1,35 +1,6 @@
 [
   {
-    "id": 1327,
-    "title": "Agentic Webを実現するためのA2A",
-    "content": "<div class=\"container\">\n        <h1>Agentic Webを実現するためのA2A</h1>\n        \n        <p>従来の Web はブラウザが <span class=\"tech-term\">HTML + CSS + JavaScript</span> を解釈して人間に向けて画面を生成しますが、近年、AIエージェントが人間とのインタフェースを担うようになると、Webブラウザを介さずに、AIエージェントがWebコンテンツを直接解釈して、ユーザのニーズにあわせて音声や画像で伝える世界が生まれようとしています。このトレンドを<span class=\"highlight\">Agentic Web</span>というようです。</p>\n        \n        <p>つまり、Agentic Web では人間が HTML を見る代わりに <span class=\"highlight\">AI エージェント</span> が直接 <span class=\"tech-term\">JSON</span>（と静的アセット）だけを受け取り、音声・チャット・AR HUD などユーザに最適な形に再レンダリングします。</p>\n        \n        <p>実は、このサイト自身もヘッドレスCMSと呼ばれる構造となっており、記事のコンテンツをHTMLではなく、AIエージェントが読みやすいJSONフォーマットで、<span class=\"tech-term\">https://web.fujimura.com/posts.json</span> で配信しています。</p>\n        \n        <p>これまではユーザとコンテンツ提供者の間にWebブラウザが存在していたわけですが、ユーザ側のAIエージェントとコンテンツ提供者側のAIエージェントがお互いにJSON形式のデータをやり取りして、ユーザに情報を提供するというわけです。</p>\n        \n        <div class=\"illustration\">\n            <img src=\"./a2a-diagram.png\" alt=\"A2A アーキテクチャ図\" style=\"max-width: 100%; height: auto;\" />\n            <p style=\"margin-top: 15px; color: #7f8c8d; font-size: 14px;\">A2A プロトコルによるAIエージェント間のJSON通信</p>\n        </div>\n        \n        <p>この形態では、通知方法についても、よりリアルタイムにAIエージェントに通知できるのがメリットです。人間への通知では、お風呂や睡眠中では対応できませんが、AIエージェントが代行して対応してもらえるようになるでしょう。</p>\n        \n        <p>このようなAIエージェント同士の通信プロトコルについては、現在Linux FoundationがA2Aとよぶプロトコルの標準化を進めています。</p>\n        \n        <p>A2Aでは、<span class=\"tech-term\">SSE Stream</span>, <span class=\"tech-term\">Webhook Push</span>, <span class=\"tech-term\">Event Bus Bridge</span>とよぶ３つのチャンネルでA2A同士がリアルタイムで連携する通知の手段が検討されています。</p>\n        \n        <h2>A2A標準化の最新動向</h2>\n        \n        <table class=\"timeline-table\">\n            <thead>\n                <tr>\n                    <th>日付</th>\n                    <th>進捗</th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr>\n                    <td><strong>2025-03</strong></td>\n                    <td>Google が A2A を OSS 化し、Linux Foundation でホスト (linuxfoundation.org, Google Developers Blog)</td>\n                </tr>\n                <tr>\n                    <td><strong>2025-06</strong></td>\n                    <td>A2A v1 β公開。SSE/Webhook/JSON-RPC 2.0 をコア仕様に明記 (linuxfoundation.org)</td>\n                </tr>\n                <tr>\n                    <td><strong>2025-Q4 予定</strong></td>\n                    <td>CloudEvents マッピング & gRPC streaming 拡張ドラフト提出</td>\n                </tr>\n            </tbody>\n        </table>\n        \n        <p>A2A は \"運搬方式を固定しすぎない\" 方針で、<span class=\"highlight\">ペイロードは基本 JSON</span>、拡張で <span class=\"tech-term\">Protobuf／MsgPack</span> も negotiable です。セキュリティ層は <span class=\"tech-term\">OAuth2／mTLS／DIDComm v2</span> を選択制。(Google Cloud Community)</p>\n        \n        <h2>通知機能</h2>\n        \n        <p>A2Aでは、リアルタイムの通信のための通知機能としてイベントの配信方法についても検討されています。例えば、以下のようにコンテンツ提供者がユーザ側エージェントに対して以下のようなデータイベントとして通知できる仕様が検討されています。</p>\n        \n        <div class=\"section-agent\">\n            <h3>コンテンツ提供者側エージェント</h3>\n            \n            <div class=\"code-block\">\n<span class=\"json-comment\">// CloudEvents 形式の change feed 例</span>\n{\n  \"specversion\":\"1.0\",\n  \"type\":\"ai.a2a.content.created\",\n  \"source\":\"https://web.fujimura.com\",\n  \"subject\":\"posts/2025-07-15-agentic-web\",\n  \"time\":\"2025-07-15T09:00:00Z\",\n  \"datacontenttype\":\"application/json\",\n  \"data\":{\n    \"url\":\"/posts/2025-07-15-agentic-web\",\n    \"revision\":1\n  }\n}\n            </div>\n            \n            <ol>\n                <li><span class=\"tech-term\">posts.json</span> の一覧エンドポイントに加えて /events を用意し、CloudEvents を SSE／Webhook で配信。</li>\n                <li>必要に応じて<span class=\"tech-term\">JSON Web Token(JWT)</span> or <span class=\"tech-term\">mTLS</span> で正当な購読者を検証。</li>\n                <li>HTML の生成は省き、フロントが必要なら静的生成ツールで後段対応。</li>\n            </ol>\n        </div>\n        \n        <div class=\"section-user\">\n            <h3>ユーザ側エージェント</h3>\n            \n            <p><strong>Capabilities 宣言:</strong></p>\n            <div class=\"code-block\">\n{ \"capabilities\":{ \"streaming\":true,\"pushNotifications\":true } }\n            </div>\n            \n            <ul>\n                <li>通知を受けたら <span class=\"tech-term\">GET /posts/{slug}.json</span> で本文を Pull → 人間向けチャット or 音声 TTS に変換。</li>\n                <li>キャッシュ整合を保つため <span class=\"tech-term\">ETag／Last-Modified</span> を利用する。</li>\n            </ul>\n        </div>\n        \n        <div class=\"summary-box\">\n            <h2>まとめ</h2>\n            <ul>\n                <li><strong>HTML 主体の Web</strong> から <strong>JSON 主体の Agentic Web</strong> へ移行が始まった。</li>\n                <li>A2A プロトコルは通知メカニズムとして <em>SSE</em>・<em>Webhook</em>・<em>CloudEvents</em> を定義しオープン標準化が進行中。</li>\n                <li>本記事も posts.json で既に配信中。エージェントから直接購読すればブラウザ不要で読める。</li>\n                <li>今から <strong>構造化 API・通知エンドポイント・セキュア証明</strong> を整えておくことで、次世代 Web へのスムーズな橋渡しができる。</li>\n            </ul>\n        </div>\n        \n        <p>未来のユーザー体験は「どの画面で見るか」ではなく「<strong>どのエージェントがどう見せてくれるか</strong>」で決まります。開発者は JSON と通知チャネルを整え、エージェントが活用しやすい情報を提供しましょう。これは<strong>SEO (Search Engine Optimization)からAAO (AI Agent Optimization)へのシフト</strong>と呼べるものですね。</p>\n    </div>",
-    "excerpt": "従来のHTML主体のWebから、AIエージェント同士がJSON形式でデータをやり取りするAgentic Webへの移行と、Linux FoundationによるA2Aプロトコルの標準化について解説します。",
-    "date": "2025-07-19T15:30:00.000Z",
-    "modified": "2025-07-19T15:30:00.000Z",
-    "slug": "agentic-web-a2a-protocol",
-    "status": "publish",
-    "author": "fujimura",
-    "categories": [
-        "AI",
-        "Web3",
-        "技術",
-        "プロトコル"
-    ],
-    "tags": [
-        "A2A",
-        "Agentic Web",
-        "AIエージェント",
-        "JSON",
-        "プロトコル",
-        "Linux Foundation",
-        "SSE",
-        "Webhook",
-        "CloudEvents"
-    ],
-    "featuredImageUrl": "./a2a-diagram.png"
-  },
-  {
-    "content": "<p>私たちのゼミでは、ブロックチェーンを活用した認証系アプリの開発に取り組んでいます。今年度、3年生の初回Web3体験授業に<strong>Nebula AI Wallet</strong>を導入したところ、「新しい時代の幕開け」を実感する画期的な体験となりました。</p><h2>従来の課題：MetaMaskの複雑さ</h2><p>昨年度まで使用していたMetaMaskでは以下の問題がありました：</p><ul><li>MetaMaskのインストールやシークレットリカバリーフレーズの管理に多くの時間がかかる</li><li>毎回のアカウントのサインインが面倒</li><li>ガス料金のためのETH又はsepoliaETHの配布が必要</li></ul><h2>Nebula AI Walletとは？自然言語で操作するブロックチェーン</h2><img src=\"/images/2025/07/nebulaAIwallet.png\" alt=\"Nebula AI Walletインターフェース\" style=\"max-width: 100%; height: auto;\" /><h3>革新的な機能</h3><p><a href=\"https://thirdweb.com/nebula\">Nebula AI Wallet</a>は、thirdwebが開発した強力なブロックチェーン用AIです。以下の特徴があります：</p><ul><li><strong>アカウント生成</strong>：Account Abstractionとよぶ機能により、大学のGoogleアカウント認証だけでも簡単にアカウントが生成できる</li><li><strong>自然言語処理</strong>：「友達にNFTを送って」などの日本語で操作</li><li><strong>リアルタイムデータアクセス</strong>：2,500以上のEVMネットワークに対応</li><li><strong>ガスレス体験</strong>：開発者がガス料金をスポンサー</li></ul><h3>t1モデル：ブロックチェーン特化AI</h3><p>Nebulaの核心は「t1」という独自のLLMです。数十万のスマートコントラクトと数十億のトランザクションでトレーニングされており、一般的なAIモデルを大幅に上回るブロックチェーン理解力を持っています。</p><p><em>参考：<a href=\"https://blog.thirdweb.com/introducing-nebula-a-powerful-blockchain-model-to-read-write-and-reason-onchain/\">Introducing Nebula: A powerful AI model to read, write and reason onchain</a></em></p><h2>実際の授業体験：魔法のようなNFT発行・譲渡</h2><h3>新しい体験フロー</h3><ol><li><strong>AIとの対話開始</strong><ul><li>「猫の絵のNFTを作りたい」と日本語で入力</li><li>Nebulaが自動でスマートコントラクトを選択・実行</li></ul></li><li><strong>ガスレス実行</strong><ul><li>学生はガス料金を気にせず操作</li><li>AIが最適なトランザクションを自動構築</li></ul></li><li><strong>自然な譲渡体験</strong><ul><li>「田中くんにこのNFTをプレゼントして」</li><li>AIが相手のアドレスを確認し、安全に転送</li></ul></li></ol><h3>AI×Web3の新しい学習体験</h3><p>このように、thirdwebが提供するNebula AI Walletにより、学生たちは以下の体験ができました：</p><ul><li><strong>直感的なブロックチェーン操作</strong>：コマンドラインやUIではなく、自然言語</li><li><strong>リアルタイムの学習</strong>：AIが操作の説明をしながら実行。web3についての個別指導が受けられる。</li><li><strong>創造的な発想</strong>：技術的制約を気にせずアイデアに集中</li></ul><p><em>参考：<a href=\"https://blog.thirdweb.com/guides/building-an-ai-powered-blockchain-explorer-with-nebula/\">Building an AI-Powered Blockchain Explorer with Nebula</a></em></p><h2>まとめ</h2><ol><li><strong>技術と人間の境界がなくなった</strong><ul><li>AIが技術的複雑さを吸収</li><li>人間は創造的思考に集中</li></ul></li><li><strong>プログラミング不要のdApp開発</strong><ul><li>自然言語でブロックチェーンアプリケーション構築</li><li>非技術者もWeb3開発者に</li></ul></li><li><strong>リアルタイム学習</strong><ul><li>AIが操作しながら教える新しい教育スタイル</li></ul></li></ol><p>今後は、この体験を深めていき、NFT認証をつかったアプリケーションのアイデアとプロトタイプを開発して行く予定です。また、楽しいアプリケーションを開発した際には、このサイトに投稿していく予定です。</p><h3>参考リンク</h3><ul><li><a href=\"https://thirdweb.com/nebula\">thirdweb Nebula公式</a></li><li><a href=\"https://portal.thirdweb.com/nebula\">Nebula Documentation</a></li><li><a href=\"https://blog.thirdweb.com/introducing-nebula-a-powerful-blockchain-model-to-read-write-and-reason-onchain/\">thirdweb Blog - Introducing Nebula</a></li></ul>",
+    "content": "<img src=\"/images/2025/07/nebulaFeatured.png\" alt=\"Nebula AI Walletを使用する様子\" style=\"max-width: 100%; height: auto;\" /><p>私たちのゼミでは、ブロックチェーンを活用した認証系アプリの開発に取り組んでいます。今年度、3年生の初回Web3体験授業に<strong>Nebula AI Wallet</strong>を導入したところ、「新しい時代の幕開け」を実感する画期的な体験となりました。</p><h2>従来の課題：MetaMaskの複雑さ</h2><p>昨年度まで使用していたMetaMaskでは以下の問題がありました：</p><ul><li>MetaMaskのインストールやシークレットリカバリーフレーズの管理に多くの時間がかかる</li><li>毎回のアカウントのサインインが面倒</li><li>ガス料金のためのETH又はsepoliaETHの配布が必要</li></ul><h2>Nebula AI Walletとは？自然言語で操作するブロックチェーン</h2><img src=\"/images/2025/07/nebulaAIwallet.png\" alt=\"Nebula AI Walletインターフェース\" style=\"max-width: 100%; height: auto;\" /><h3>革新的な機能</h3><p><a href=\"https://thirdweb.com/nebula\">Nebula AI Wallet</a>は、thirdwebが開発した強力なブロックチェーン用AIです。以下の特徴があります：</p><ul><li><strong>アカウント生成</strong>：Account Abstractionとよぶ機能により、大学のGoogleアカウント認証だけでも簡単にアカウントが生成できる</li><li><strong>自然言語処理</strong>：「友達にNFTを送って」などの日本語で操作</li><li><strong>リアルタイムデータアクセス</strong>：2,500以上のEVMネットワークに対応</li><li><strong>ガスレス体験</strong>：開発者がガス料金をスポンサー</li></ul><h3>t1モデル：ブロックチェーン特化AI</h3><p>Nebulaの核心は「t1」という独自のLLMです。数十万のスマートコントラクトと数十億のトランザクションでトレーニングされており、一般的なAIモデルを大幅に上回るブロックチェーン理解力を持っています。</p><p><em>参考：<a href=\"https://blog.thirdweb.com/introducing-nebula-a-powerful-blockchain-model-to-read-write-and-reason-onchain/\">Introducing Nebula: A powerful AI model to read, write and reason onchain</a></em></p><h2>実際の授業体験：魔法のようなNFT発行・譲渡</h2><h3>新しい体験フロー</h3><ol><li><strong>AIとの対話開始</strong><ul><li>「猫の絵のNFTを作りたい」と日本語で入力</li><li>Nebulaが自動でスマートコントラクトを選択・実行</li></ul></li><li><strong>ガスレス実行</strong><ul><li>学生はガス料金を気にせず操作</li><li>AIが最適なトランザクションを自動構築</li></ul></li><li><strong>自然な譲渡体験</strong><ul><li>「田中くんにこのNFTをプレゼントして」</li><li>AIが相手のアドレスを確認し、安全に転送</li></ul></li></ol><h3>AI×Web3の新しい学習体験</h3><p>このように、thirdwebが提供するNebula AI Walletにより、学生たちは以下の体験ができました：</p><ul><li><strong>直感的なブロックチェーン操作</strong>：コマンドラインやUIではなく、自然言語</li><li><strong>リアルタイムの学習</strong>：AIが操作の説明をしながら実行。web3についての個別指導が受けられる。</li><li><strong>創造的な発想</strong>：技術的制約を気にせずアイデアに集中</li></ul><p><em>参考：<a href=\"https://blog.thirdweb.com/guides/building-an-ai-powered-blockchain-explorer-with-nebula/\">Building an AI-Powered Blockchain Explorer with Nebula</a></em></p><h2>まとめ</h2><ol><li><strong>技術と人間の境界がなくなった</strong><ul><li>AIが技術的複雑さを吸収</li><li>人間は創造的思考に集中</li></ul></li><li><strong>プログラミング不要のdApp開発</strong><ul><li>自然言語でブロックチェーンアプリケーション構築</li><li>非技術者もWeb3開発者に</li></ul></li><li><strong>リアルタイム学習</strong><ul><li>AIが操作しながら教える新しい教育スタイル</li></ul></li></ol><p>今後は、この体験を深めていき、NFT認証をつかったアプリケーションのアイデアとプロトタイプを開発して行く予定です。また、楽しいアプリケーションを開発した際には、このサイトに投稿していく予定です。</p><h3>参考リンク</h3><ul><li><a href=\"https://thirdweb.com/nebula\">thirdweb Nebula公式</a></li><li><a href=\"https://portal.thirdweb.com/nebula\">Nebula Documentation</a></li><li><a href=\"https://blog.thirdweb.com/introducing-nebula-a-powerful-blockchain-model-to-read-write-and-reason-onchain/\">thirdweb Blog - Introducing Nebula</a></li></ul>",
     "excerpt": "MetaMaskからAI Walletへの大転換。3年生の初回Web3体験授業でNebula AI Walletを導入した画期的な体験を紹介します。",
     "date": "2025-07-07T07:43:02.347Z",
     "modified": "2025-07-07T07:43:02.347Z",
@@ -52,5 +23,1139 @@
     "featuredImageUrl": "/images/2025/07/nebulaFeatured.png",
     "title": "Nebula AI Walletを使ったweb3体験授業",
     "id": 1326
+  },
+  {
+    "content": "<p>みなさん、こんにちは！今日は、OpenAIが密かに開発を進めているとされる、新しいAIデバイスについて掘り下げてみたいと思います。</p><p>「AI」と聞くと、スマホのアプリやPCのソフトを思い浮かべる方が多いかもしれませんね。でも、OpenAIが目指しているのは、私たちの生活に溶け込むような、まったく新しい形のデバイスのようです。</p><h2>ジョニー・アイブ氏との夢のタッグ！</h2><p>この新デバイス開発の裏には、なんとあのAppleの元天才デザイナー、ジョニー・アイブ氏が関わっているというから驚きです！彼のデザイン哲学とOpenAIの最先端AI技術が融合することで、どんな魔法が生まれるのか、本当に楽しみです。</p><p>現時点での情報はまだ少ないのですが、このデバイスは、</p><ul><li>スクリーンレス（画面なし）</li><li>ポケットサイズでコンパクト</li><li>カメラとマイクを搭載</li><li>首から下げて使える可能性も？</li></ul><p>といった特徴があるようです。いわゆる「ポスト・スマートフォン」時代を象徴する、AIを自然に使える「AIコンパニオン」を目指しているとのこと。スマホやPCをいちいち操作しなくても、AIが常にあなたのそばにいて、必要な時に手助けしてくれるようなイメージでしょうか。</p><p>とりあえず、これだけの情報からGeminiの画像生成AIを使って、デバイスを予想させてみたのが、以下です。</p><img src=\"/images/NewOpenAI-Device1.jpeg\" alt=\"AIデバイスのコンセプト画像\" style=\"max-width: 100%; height: auto;\" /><h2>プライバシーと愛着、そして未来のデザイン</h2><p>しかし、カメラやマイクが常に周囲の情報をキャッチするとなると、気になるのがプライバシーですよね。この点については、カメラがONになっていることを周囲に明確に伝える仕組みが必要ではないかと考えております。Google Glassもそれが問題で普及を妨げました。</p><p>そこで私が予想するのは、デバイス自体がぬいぐるみやフィギュアのようなデザインになるというものです！目がカメラになっていて、ONになると頭部が光るものです。これなら、見た目にも親しみやすく、かつプライバシーへの配慮も視覚的に伝わりやすいかもしれません。</p><p>さらに、スマホカバーのように、たくさんのキャラクターデザインの「外側」が販売されるマーケットが生まれる可能性も考えられます。もし本当にそうなれば、自分の好きなキャラクターの姿をしたAIエージェントと暮らせる日が来るかもしれませんね。目玉おやじやポケモンのようなエージェントが、あなたの日常をサポートしてくれる…想像するだけで楽しいです！</p><img src=\"/images/NewOpenAI−Device2.jpeg\" alt=\"キャラクター型AIデバイスのコンセプト画像\" style=\"max-width: 100%; height: auto;\" /><h2>まとめ：期待と課題のAIデバイス</h2><p>OpenAIの新しいAIデバイスは、私たちのデジタル体験を根本から変える可能性を秘めています。しかし、そのためには技術的な課題だけでなく、プライバシーの問題、そして何よりも「人々がどのようにそれを受け入れ、生活に取り入れていくか」という大きな問いに答える必要があります。</p><p>2026年頃に発表されると予想されているこのデバイス。まだ謎が多いですが、今後の情報に注目しつつ、AIがもたらす新しいライフスタイルに期待を膨らませていきましょう！</p>",
+    "excerpt": "OpenAIが開発中とされる新しいAIデバイスについて、ジョニー・アイブ氏との協力、デザインの可能性、プライバシーの課題などを考察します。",
+    "date": "2025-07-05T07:33:37.714Z",
+    "modified": "2025-07-05T07:33:37.714Z",
+    "slug": "post-1325",
+    "status": "publish",
+    "author": "fujimura",
+    "categories": [
+      "AI",
+      "技術",
+      "未来予測"
+    ],
+    "tags": [
+      "OpenAI",
+      "AIデバイス",
+      "ジョニー・アイブ",
+      "ハードウェア",
+      "プライバシー"
+    ],
+    "featuredImageUrl": "/images/NewOpenAI−Device2.jpeg",
+    "title": "OpenAIが描く未来のAIデバイスを予想しよう",
+    "id": 1325
+  },
+  {
+    "content": "<p>報告が遅くなりましたが、2025年3月に卒業した藤村ゼミの12回目の卒業生の卒業研究発表会は1月27日に行われました。</p><p>今年は8名7組の学生が以下のタイトルで発表しました。今年はAI活用のテーマが4件、NFT活用のテーマが3件となりました。</p><h3>AI活用テーマ</h3><ul><li><strong>GPTモデルを用いた音楽歌詞の解析によるキャラクター生成システム</strong><br>本研究では、音楽歌詞の解析を通してその音楽にマッチするキャラクター画像を生成します。音声認識モデルWhisperでマイクから入力した音声から歌詞を文字起こしし、GPTモデルで感情や特徴を解析します。その結果からキャラクターパーツを選定し、ユーザーが自由に好みのキャラクターを生成できる創作支援ツールを実現しました。</li><li><strong>聴覚障がい者のための環境音認識</strong><br>本研究では、聴覚障がい者が日常生活で聞く環境音を中心に音の分析を行いました。Google Colaboratory上でYAMNetを用いた音声分類を実施し、波形やスペクトログラムを観察することで、音声認識精度向上の改善点を明らかにすることを目指しました。雑音環境や類似音源での誤認識といった課題が残るものの、聴覚障がい者の生活向上に繋がる第一歩となることが期待されます。</li><li><strong>生成AIを用いた画像からのシャインマスカット重さ推定</strong><br>本研究では、生成AIを活用し、少量の画像データからシャインマスカットの重さを推定するシステムを構築し、その有効性を検証しました。OpenAI APIの「gpt-4o-mini」と「gpt-4o」モデルを採用し、<a href=\"/images/muscat-measure.png\" target=\"_blank\">アイキャッチ画像</a>の通り115房分の合計460枚の画像データから重さを推定します。提案手法により、平均絶対誤差(MAE)は単純な平均の計算と比較して大幅に低減し、農業分野での効率化や持続可能性に貢献する可能性を示しました。</li><li><strong>目の温度測定システムの開発とその疲労度推定への応用</strong><br>本研究では、赤外線カメラと顔認識技術を組み合わせ、簡易的かつリアルタイムで目の位置を特定し、温度を測定するシステムを開発しました。開発したシステムを活用した実験から、目の温度と目の疲労度には相関があることが分かりました。非接触型温度計測の新たな活用方法を示し、スマートデバイスを用いた健康管理の一環として広く利用できる可能性を秘めています。</li></ul><h3>NFT活用テーマ</h3><ul><li><strong>読者の感情を反映したNFTを発行する読書体験システム</strong><br>本研究では、読了後の感情が次の読書選択に反映されにくいという課題に対し、NFT技術を活用して読者の感情を反映した「感情NFT」を提案し、新たな読書体験システムを構築しました。感情NFTは、読後に感じた「喜」「怒」「哀」「楽」「驚」「恐」「穏やか」の7種類の感情に基づいて発行されます。これにより、読書体験が感情的な価値を持つ継続的なプロセスとなり、出版社の問題点や著作権の観点、今後の展望とビジネスモデルとしての可能性も示されました。</li><li><strong>NFCチップとNFTの連携による真贋判定システム</strong><br>本研究は、NFC技術とNFTを融合させた真贋判定システムの有効性を検証し、物理的資産の真正性をデジタル技術で保証する仕組みを提案しました。NFCチップを物理的資産に取り付け、スマートフォンでスキャンすることで、スマートコントラクトと連携し、アイテムの真正性を確認します。このシステムは改ざんが困難で透明性が高く、博物館業務や美術品取引における信頼性向上が期待されます。</li><li><strong>NFT活用による学習意欲の向上とコミュニティ活性化支援LMS</strong><br>本研究では、オンライン学習における学習者間のコミュニケーション不足や学習成果の可視化不足の課題を解決するため、学習者の動画視聴状況に基づいて学習証明NFTを発行し、学習成果の可視化と学習者間の交流を促進するLMSを開発しました。YouTube APIを用いて動画視聴状況を追跡し、80%以上視聴した際にNFTを発行します。これにより学習者は学習成果をNFTとして保持し、同じ教科に興味を持つ学習者とコミュニケーションを取ることで、学習意欲の向上や孤独感の解消が期待されます。</li></ul><p>また、「NFT活用による学習意欲の向上とコミュニティ活性化支援LMS」については専攻で制作した以下の概要の動画がありますので、ご覧ください。</p><div class=\"youtube-embed\"><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/v-vffdIExcM\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" allowfullscreen></iframe></div>",
+    "excerpt": "2024年度藤村ゼミ卒業研究発表会が1月27日に開催されました。AI活用4件、NFT活用3件の合計7組の研究発表が行われました。",
+    "date": "2025-07-05T03:49:59.471Z",
+    "modified": "2025-07-05T03:49:59.471Z",
+    "slug": "post-1324",
+    "status": "publish",
+    "author": "fujimura",
+    "categories": [
+      "卒業研究",
+      "発表会",
+      "AI",
+      "NFT"
+    ],
+    "tags": [
+      "2024年度",
+      "卒業研究発表会",
+      "AI",
+      "NFT",
+      "機械学習",
+      "ブロックチェーン"
+    ],
+    "featuredImageUrl": "/images/muscat-measure.png",
+    "title": "2024年度 卒業研究発表会",
+    "id": 1324
+  },
+  {
+    "id": 1323,
+    "title": "AIとの対話ではじめて記事を投稿してみました",
+    "content": "<p>ClaudeのクライアントにGitHubのMCPサーバを設定し、プルリクエストを送信できるようにして、対話だけで記事を投稿してみました。<span style=\"background: linear-gradient(180deg, transparent 60%, #fef3c7 60%); padding: 2px 4px; font-weight: 600;\">この記事がその結果です。</span></p><h2>🤖 仕組みはとってもシンプル</h2><p>詳しくはこの図に記載していますが、<span style=\"background: linear-gradient(180deg, transparent 60%, #fef3c7 60%); padding: 2px 4px; font-weight: 600;\">ユーザはAIとお話して画像とテキストの内容を固めるだけで、後はすべて自動で投稿が行われます。</span></p><div style=\"text-align: center; margin: 40px 0; padding: 20px; background: #f9fafb; border-radius: 8px;\"><svg viewBox=\"0 0 600 400\" xmlns=\"http://www.w3.org/2000/svg\" style=\"max-width: 100%; height: auto;\"><defs><linearGradient id=\"bgGrad\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\"><stop offset=\"0%\" style=\"stop-color:#f8fafc;stop-opacity:1\" /><stop offset=\"100%\" style=\"stop-color:#e2e8f0;stop-opacity:1\" /></linearGradient><marker id=\"arrow\" markerWidth=\"8\" markerHeight=\"6\" refX=\"7\" refY=\"3\" orient=\"auto\"><polygon points=\"0 0, 8 3, 0 6\" fill=\"#3b82f6\"/></marker></defs><rect width=\"600\" height=\"400\" fill=\"url(#bgGrad)\"/><text x=\"300\" y=\"30\" text-anchor=\"middle\" fill=\"#1f2937\" font-size=\"18\" font-weight=\"bold\">AI記事投稿システム</text><g transform=\"translate(50, 80)\"><rect width=\"80\" height=\"60\" rx=\"8\" fill=\"#dbeafe\" stroke=\"#3b82f6\" stroke-width=\"2\"/><circle cx=\"40\" cy=\"25\" r=\"8\" fill=\"#3b82f6\"/><circle cx=\"37\" cy=\"23\" r=\"1.5\" fill=\"white\"/><circle cx=\"43\" cy=\"23\" r=\"1.5\" fill=\"white\"/><path d=\"M 34 28 Q 40 32 46 28\" stroke=\"white\" stroke-width=\"1.5\" fill=\"none\"/><text x=\"40\" y=\"50\" text-anchor=\"middle\" fill=\"#1e40af\" font-size=\"10\" font-weight=\"bold\">ユーザー</text></g><g transform=\"translate(200, 80)\"><rect width=\"80\" height=\"60\" rx=\"8\" fill=\"#fed7aa\" stroke=\"#f97316\" stroke-width=\"2\"/><circle cx=\"40\" cy=\"25\" r=\"10\" fill=\"#f97316\"/><text x=\"40\" y=\"31\" text-anchor=\"middle\" fill=\"white\" font-size=\"12\" font-weight=\"bold\">C</text><text x=\"40\" y=\"50\" text-anchor=\"middle\" fill=\"#c2410c\" font-size=\"10\" font-weight=\"bold\">Claude AI</text></g><g transform=\"translate(350, 80)\"><rect width=\"80\" height=\"60\" rx=\"8\" fill=\"#f3f4f6\" stroke=\"#6b7280\" stroke-width=\"2\"/><circle cx=\"40\" cy=\"25\" r=\"8\" fill=\"#24292e\"/><path d=\"M 40 20 m -5 0 a 5 5 0 0 0 0 8 a 3 3 0 0 1 -2 -3 a 3 3 0 0 1 -1.5 -2.5 a 3 3 0 0 1 3.5 -2.5 z\" fill=\"white\"/><text x=\"40\" y=\"50\" text-anchor=\"middle\" fill=\"#374151\" font-size=\"10\" font-weight=\"bold\">GitHub</text></g><g transform=\"translate(470, 80)\"><rect width=\"80\" height=\"60\" rx=\"8\" fill=\"#ede9fe\" stroke=\"#8b5cf6\" stroke-width=\"2\"/><rect x=\"15\" y=\"15\" width=\"50\" height=\"30\" rx=\"3\" fill=\"#8b5cf6\" opacity=\"0.8\"/><rect x=\"20\" y=\"20\" width=\"40\" height=\"5\" fill=\"white\"/><rect x=\"20\" y=\"28\" width=\"30\" height=\"3\" fill=\"white\" opacity=\"0.8\"/><rect x=\"20\" y=\"33\" width=\"35\" height=\"3\" fill=\"white\" opacity=\"0.8\"/><text x=\"40\" y=\"55\" text-anchor=\"middle\" fill=\"#6d28d9\" font-size=\"9\" font-weight=\"bold\">ウェブサイト</text></g><path d=\"M 130 110 L 190 110\" stroke=\"#3b82f6\" stroke-width=\"2\" fill=\"none\" marker-end=\"url(#arrow)\"/><path d=\"M 280 110 L 340 110\" stroke=\"#3b82f6\" stroke-width=\"2\" fill=\"none\" marker-end=\"url(#arrow)\"/><path d=\"M 430 110 L 460 110\" stroke=\"#3b82f6\" stroke-width=\"2\" fill=\"none\" marker-end=\"url(#arrow)\"/><text x=\"160\" y=\"100\" text-anchor=\"middle\" fill=\"#3b82f6\" font-size=\"9\" font-weight=\"bold\">対話</text><text x=\"310\" y=\"100\" text-anchor=\"middle\" fill=\"#3b82f6\" font-size=\"9\" font-weight=\"bold\">自動投稿</text><text x=\"445\" y=\"100\" text-anchor=\"middle\" fill=\"#3b82f6\" font-size=\"9\" font-weight=\"bold\">公開</text><g transform=\"translate(0, 200)\"><rect x=\"30\" y=\"20\" width=\"120\" height=\"50\" rx=\"5\" fill=\"#ecfdf5\" stroke=\"#10b981\" stroke-width=\"1\"/><text x=\"90\" y=\"35\" text-anchor=\"middle\" fill=\"#047857\" font-size=\"11\" font-weight=\"bold\">1️⃣ 記事の相談</text><text x=\"90\" y=\"50\" text-anchor=\"middle\" fill=\"#065f46\" font-size=\"9\">「こんな記事書きたい」</text><text x=\"90\" y=\"62\" text-anchor=\"middle\" fill=\"#065f46\" font-size=\"9\">とAIに話すだけ</text><rect x=\"170\" y=\"20\" width=\"120\" height=\"50\" rx=\"5\" fill=\"#fef3c7\" stroke=\"#f59e0b\" stroke-width=\"1\"/><text x=\"230\" y=\"35\" text-anchor=\"middle\" fill=\"#92400e\" font-size=\"11\" font-weight=\"bold\">2️⃣ AI処理</text><text x=\"230\" y=\"50\" text-anchor=\"middle\" fill=\"#78350f\" font-size=\"9\">文章作成・画像生成</text><text x=\"230\" y=\"62\" text-anchor=\"middle\" fill=\"#78350f\" font-size=\"9\">投稿準備を自動実行</text><rect x=\"310\" y=\"20\" width=\"120\" height=\"50\" rx=\"5\" fill=\"#dbeafe\" stroke=\"#3b82f6\" stroke-width=\"1\"/><text x=\"370\" y=\"35\" text-anchor=\"middle\" fill=\"#1e40af\" font-size=\"11\" font-weight=\"bold\">3️⃣ 自動公開</text><text x=\"370\" y=\"50\" text-anchor=\"middle\" fill=\"#1e3a8a\" font-size=\"9\">ウェブサイトに</text><text x=\"370\" y=\"62\" text-anchor=\"middle\" fill=\"#1e3a8a\" font-size=\"9\">記事が自動で掲載</text><path d=\"M 150 45 L 160 45\" stroke=\"#10b981\" stroke-width=\"2\" fill=\"none\" marker-end=\"url(#arrow)\"/><path d=\"M 290 45 L 300 45\" stroke=\"#10b981\" stroke-width=\"2\" fill=\"none\" marker-end=\"url(#arrow)\"/></g><rect x=\"50\" y=\"320\" width=\"500\" height=\"50\" rx=\"8\" fill=\"#f0f9ff\" stroke=\"#0ea5e9\" stroke-width=\"2\"/><text x=\"300\" y=\"340\" text-anchor=\"middle\" fill=\"#0c4a6e\" font-size=\"14\" font-weight=\"bold\">✨ たった3分で記事完成！プログラミング知識不要</text><text x=\"300\" y=\"358\" text-anchor=\"middle\" fill=\"#0369a1\" font-size=\"12\">従来の方法では30分〜1時間かかる作業が、AI対話だけで完了</text><circle cx=\"520\" cy=\"50\" r=\"3\" fill=\"#f472b6\" opacity=\"0.6\"/><circle cx=\"80\" cy=\"60\" r=\"2\" fill=\"#34d399\" opacity=\"0.6\"/><circle cx=\"580\" cy=\"380\" r=\"2\" fill=\"#a78bfa\" opacity=\"0.6\"/></svg></div><h3>普通の会話をするだけ</h3><p>「こんな記事を書きたい」とAIに話しかけるだけ。LINEで友達とやりとりするのと同じような感覚です。難しい操作は一切ありません。</p><h3>AIが全部やってくれる</h3><div style=\"background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0;\"><h4 style=\"color: #0c4a6e; margin: 0 0 10px 0; font-size: 16px;\">🖊️ 記事の文章を考えてくれる</h4><p>タイトルから本文まで、読みやすい文章を自動で作成してくれます。</p></div><div style=\"background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0;\"><h4 style=\"color: #0c4a6e; margin: 0 0 10px 0; font-size: 16px;\">🎨 イラストも描いてくれる</h4><p>記事の内容に合った、オリジナルのイラストを生成してくれます。</p></div><div style=\"background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0;\"><h4 style=\"color: #0c4a6e; margin: 0 0 10px 0; font-size: 16px;\">🚀 ウェブサイトに投稿する準備も自動</h4><p>技術的な作業は全てAIが代行。数分後には記事が公開されています。</p></div><h2>💡 今までとの違い</h2><div style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;\"><div style=\"background: #fef2f2; border: 1px solid #f87171; border-radius: 8px; padding: 15px;\"><h4>😅 昔の方法</h4><ul><li>WordやGoogleドキュメントで文章を書く</li><li>画像を別で用意する</li><li>ブログサイトにログインする</li><li>文章をコピペして、画像をアップロード</li><li>レイアウトを調整</li><li>公開ボタンを押す</li></ul><p><strong>⏰ 所要時間：30分〜1時間</strong></p></div><div style=\"background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 15px;\"><h4>✨ 新しい方法</h4><ul><li>AIと「こんな記事書きたい」って話すだけ</li><li>終わり！</li></ul><p><strong>⏰ 所要時間：3分</strong></p></div></div><h2>🎯 何がすごいの？</h2><div style=\"background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; padding: 20px; margin: 20px 0;\"><ul><li><strong>プログラミングの知識は一切不要</strong> - 専門的なスキルは必要ありません</li><li><strong>画像編集ソフトも使わない</strong> - AIが自動でイラストを作成</li><li><strong>複雑な操作は何もしない</strong> - 対話だけで全て完結</li><li><strong>AIが秘書のように全部やってくれる</strong> - 人間は「考える」だけでOK</li></ul></div><p>まるで「AIの秘書さんに『この内容でブログ記事お願いします』って頼んだら、勝手に全部やってくれた」という感じです。</p><h2>📝 実際に使ってみた感想</h2><p>今回、この記事自体がAIとの対話だけで作られています。最初は半信半疑でしたが、本当に<span style=\"background: linear-gradient(180deg, transparent 60%, #fef3c7 60%); padding: 2px 4px; font-weight: 600;\">対話するだけで記事が完成してしまいました</span>。</p><p>技術的な部分は全くわからなくても、「こんな内容の記事を書きたい」「イラストも欲しい」と伝えるだけで、AIが理解して自動で作業を進めてくれます。</p><p>技術の進歩によって、「考える」部分だけ人間がやって、「作業」の部分は全部AIにお任せできる時代になったということですね。これからのブログ執筆が楽しみになってきました！</p>",
+    "excerpt": "ClaudeとGitHub MCPサーバを使って、対話だけで記事を投稿する仕組みを構築し、実際にこの記事を投稿してみました。AIとの対話だけで文章作成・画像生成・ウェブサイト投稿まで自動化できる新しい記事執筆体験について紹介します。",
+    "date": "2025-07-02T00:00:00.000Z",
+    "modified": "2025-07-02T00:00:00.000Z",
+    "slug": "ai-dialog-first-blog-post",
+    "status": "publish",
+    "author": "fujimura",
+    "categories": [
+      "AI・テクノロジー",
+      "ブログ運営"
+    ],
+    "tags": [
+      "AI",
+      "Claude",
+      "自動化",
+      "ブログ",
+      "GitHub",
+      "MCP",
+      "対話",
+      "記事投稿"
+    ],
+    "featuredImageUrl": "/images/ai-blog-featured-image.png"
+  },
+  {
+    "id": 1322,
+    "title": "ゼミWebサイトをWordPressからNext.jsに移行しました",
+    "content": "<h2>はじめに</h2>\n<p>2025年6月30日、長年運用してきたWordPressベースのゼミWebサイトを、Next.js製の静的サイトに全面移行しました。この記事では、移行の背景と技術的なポイント、そしてClaude Codeとの協働について紹介します。</p>\n\n<h2>移行前後のサイト比較</h2>\n<div style=\"display: flex; gap: 20px; margin: 20px 0;\">\n  <div>\n    <h3>移行前（WordPress）</h3>\n    <img src=\"/images/old-wordPress-site.png\" alt=\"WordPress版のゼミWebサイト\" style=\"max-width: 100%; height: auto; border: 1px solid #ddd;\" />\n  </div>\n  <div>\n    <h3>移行後（Next.js）</h3>\n    <img src=\"/images/new-nextjs-site.png\" alt=\"Next.js版のゼミWebサイト\" style=\"max-width: 100%; height: auto; border: 1px solid #ddd;\" />\n  </div>\n</div>\n\n<h2>移行の背景</h2>\n<ul>\n<li><strong>セキュリティ</strong>: WordPressの脆弱性対応やアップデート作業の負担軽減</li>\n<li><strong>パフォーマンス</strong>: 静的サイト化によるページ読み込み速度の向上</li>\n<li><strong>運用コスト</strong>: GCP仮想マシンの月額費用からGitHub Pagesの無料運用への移行</li>\n<li><strong>モダンな開発環境</strong>: TypeScript、Tailwind CSSなど最新技術の活用</li>\n</ul>\n\n<h2>技術スタック</h2>\n<h3>移行前</h3>\n<ul>\n<li>WordPress</li>\n<li>PHP</li>\n<li>MySQL</li>\n<li>GCP（Google Cloud Platform）仮想マシンでの運用</li>\n</ul>\n\n<h3>移行後</h3>\n<ul>\n<li><strong>フレームワーク</strong>: Next.js 15</li>\n<li><strong>言語</strong>: TypeScript</li>\n<li><strong>スタイリング</strong>: Tailwind CSS</li>\n<li><strong>ホスティング</strong>: GitHub Pages（無料）</li>\n<li><strong>CI/CD</strong>: GitHub Actions</li>\n</ul>\n\n<h2>Claude Codeとの協働開発</h2>\n<p>今回の移行作業では、AnthropicのClaude Codeを積極的に活用し、効率的な開発を実現しました。</p>\n\n<h3>分担した作業</h3>\n<ul>\n<li><strong>私の担当</strong>: プロジェクト設計、要件定義、最終的な確認とテスト</li>\n<li><strong>Claude Codeの担当</strong>: コード実装、データ移行スクリプト、設定ファイル作成</li>\n</ul>\n\n<h3>Claude Codeが支援した具体的なタスク</h3>\n<ol>\n<li><strong>WordPressデータの解析と変換</strong>\n   <ul>\n   <li>WordPressエクスポートファイル（XML）の解析</li>\n   <li>記事データのJSON形式への変換</li>\n   <li>画像ファイルのパス調整</li>\n   </ul>\n</li>\n<li><strong>Next.jsアプリケーションの構築</strong>\n   <ul>\n   <li>App Routerを使用した動的ルーティング</li>\n   <li>記事詳細ページの自動生成</li>\n   <li>レスポンシブデザインの実装</li>\n   </ul>\n</li>\n<li><strong>GitHub Pages対応</strong>\n   <ul>\n   <li>静的サイトエクスポート設定</li>\n   <li>GitHub Actionsワークフローの構築</li>\n   <li>カスタムドメイン設定</li>\n   </ul>\n</li>\n</ol>\n\n<h2>技術的なポイント</h2>\n\n<h3>1. データ移行の自動化</h3>\n<p>WordPressの記事データを効率的に移行するため、専用のTypeScriptスクリプトを開発しました：</p>\n<ul>\n<li>XMLパースによる記事データの抽出</li>\n<li>HTMLコンテンツの最適化</li>\n<li>メタデータ（カテゴリ、タグ、日付）の正規化</li>\n</ul>\n\n<h3>2. 動的ルーティング</h3>\n<p>既存のURL構造（<code>/blog/archives/[id]/</code>）を維持するため、Next.jsのDynamic Routesを活用：</p>\n<ul>\n<li><code>src/app/blog/archives/[id]/page.tsx</code>での動的ページ生成</li>\n<li>静的生成時の全記事の事前レンダリング</li>\n</ul>\n\n<h3>3. 画像リソースの最適化</h3>\n<ul>\n<li>WordPressのuploadsディレクトリ構造の保持</li>\n<li>画像パスの自動調整</li>\n<li>レスポンシブ画像の実装</li>\n</ul>\n\n<h2>移行の成果</h2>\n\n<h3>パフォーマンス向上</h3>\n<ul>\n<li>ページ読み込み時間の大幅短縮</li>\n<li>静的サイトによる高速なコンテンツ配信</li>\n<li>CDN効果による世界中からのアクセス最適化</li>\n</ul>\n\n<h3>運用コスト削減</h3>\n<ul>\n<li><strong>ホスティング費用</strong>: GCP仮想マシン月額費用 → GitHub Pages（無料）</li>\n<li><strong>サーバー管理</strong>: 仮想マシンの監視・メンテナンス作業が不要に</li>\n<li><strong>スケーラビリティ</strong>: アクセス増加時の追加費用が発生しない</li>\n<li><strong>セキュリティアップデート</strong>: WordPressやサーバーOSの定期更新作業が不要</li>\n</ul>\n\n<h3>開発体験の向上</h3>\n<ul>\n<li>TypeScriptによる型安全性</li>\n<li>モダンなフロントエンド開発環境</li>\n<li>Git版管理による変更履歴の明確化</li>\n</ul>\n\n<h2>今後の展望</h2>\n<ul>\n<li><strong>コンテンツ管理の改善</strong>: Headless CMSの導入検討</li>\n<li><strong>機能拡張</strong>: 検索機能、RSS配信の実装</li>\n<li><strong>パフォーマンス最適化</strong>: 画像最適化、キャッシュ戦略の改善</li>\n<li><strong>アクセシビリティ</strong>: WCAG準拠のUI改善</li>\n</ul>\n\n<h2>おわりに</h2>\n<p>WordPressからNext.jsへの移行は、技術的な挑戦でしたが、Claude Codeとの協働により効率的に実現できました。GCPの仮想マシンからGitHub Pagesへの移行により、運用コストを完全に無料化し、セキュリティとパフォーマンスの両面で大幅な改善を達成しました。</p>\n<p>このようなWebサイト移行を検討されている方にとって、本記事が参考になれば幸いです。</p>",
+    "excerpt": "WordPressで運用してきたゼミWebサイトをNext.js製の静的サイトに移行した過程と、Claude Codeとの協働開発について紹介します。",
+    "date": "2025-06-30T00:00:00.000Z",
+    "modified": "2025-06-30T00:00:00.000Z",
+    "slug": "wordpress-to-nextjs-migration",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "web",
+      "技術",
+      "開発"
+    ],
+    "tags": [
+      "WordPress",
+      "Next.js",
+      "移行",
+      "Claude Code",
+      "静的サイト",
+      "GitHub Pages",
+      "GCP"
+    ],
+    "link": "https://kofujimura.github.io/blog/archives/1322",
+    "featuredImageUrl": "/images/new-nextjs-site.png"
+  },
+  {
+    "id": 1321,
+    "title": "2023年度 卒業研究発表会",
+    "content": "<!-- wp:paragraph -->\n<p>2024年3月に卒業した藤村ゼミの11回目の卒業生の卒業研究発表会は1月29日に行われました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>今年は11名9組の学生が以下のタイトルで発表しました。今年はAI活用のテーマが5件と過半数になりました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li>ハンドトラッキングを使ったバーチャル生け花</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>バーチャルタップダンスのための足の接地判定</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>AIとダンサーの協調作業による音楽生成</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>AIを用いたp5.jsコードの生成による図形の描画</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>音楽の特徴を用いた画像生成AIによるキャラクターの生成</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>NFTで学習成果を認定するeラーニングシステム</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>NFCを利用したコミュニケーション促進Webアプリの開発</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>多数のNFCタグを活用したインタラクション</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>華展における反応型インスタレーションの制作</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>また、「音楽の特徴を用いた画像生成AIによるキャラクターの生成」については専攻で制作した以下の概要の動画がありますので、ご覧ください。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:embed {\"url\":\"https://www.youtube.com/watch?v=sEqU5MnEGhU\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"responsive\":true,\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://www.youtube.com/watch?v=sEqU5MnEGhU\n</div></figure>\n<!-- /wp:embed -->",
+    "excerpt": "",
+    "date": "2024-09-25 12:32:06",
+    "modified": "2024-09-25 12:48:53",
+    "slug": "2023%e5%b9%b4%e5%ba%a6-%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e7%99%ba%e8%a1%a8%e4%bc%9a",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "AI"
+    ],
+    "tags": [
+      "卒業研究"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1321",
+    "featuredImageId": 1323,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2024/09/スクリーンショット-2024-09-25-12.44.08.png"
+  },
+  {
+    "id": 1311,
+    "title": "ブロックチェーンによるWebアクセスの認証",
+    "content": "<!-- wp:image {\"id\":1314,\"sizeSlug\":\"full\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-full\"><img src=\"https://web.fujimura.com/wp-content/uploads/2024/01/ERC7303-Blog.png\" alt=\"\" class=\"wp-image-1314\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>ブロックチェーンといえば、Bitcoinなどの仮想通貨やNFTなどのデジタルコンテンツの所有権の流通基盤として広く普及していますが、2023年ぐらいから、Web3認証というWebサイトなどのアクセス権に使用する方法が普及してきています。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>具体的には特定のNFTを持っている人のみがアクセスできるWebサイトや電子チケットなどへの応用などです。NFTの所有による認証手段は、会員登録が不要となることや、友人や家族などに譲渡できるなどのメリットがあり、Webサイトの認証手段として今後広く普及することが予想されています。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>NFTなどは「トークン」とも呼ばれますが、トークンの流通は、発行(mint/issue)、譲渡(transfer)、および焼却(burn)の3つの主要なトランザクションによって所有権が付与、譲渡、消去されます。これらのトランザクションを実行するには、アプリケーションに応じてさまざまな条件を満たす必要があります。例えば、認定された店舗だけがトークンを発行でき、特定の代理店だけが譲渡が許されるなどです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>私はWeb3認証を広く普及させるためには、このようなトークンの流通を柔軟に制御させるための仕組みが必要であると考えています。そして私は、このようなトランザクションの実行権限を制御するために、（別の）制御トークン(control token)を使用することを提案しています[<a href=\"https://eips.ethereum.org/EIPS/eip-7303\">ERC7303</a>]。制御トークンとは、NFTなどのトークンであり、取引参加者によってこれらの指定されたトークンを所有している場合にのみ、ターゲットとなるトークンを発行、譲渡、または焼却可能となるように制御するものです。これらの制御トークンは、アプリケーションによって、社員証や会員証など、様々なトークンが指定されます。そして、それらの制御トークン自体も同じくブロックチェーン上で再帰的に流通を制御することができます。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>より詳しい説明は<a href=\"https://zenn.dev/kofujimura/articles/6bc70628ca33ab\">こちら</a>に書きましたので参照ください。「トークンによるトークンの流通制御」のオリジナルアイデアは、私がBlockchainやEthereumが存在していなかった1999年に<a href=\"https://www.usenix.org/legacy/events/sec99/full_papers/fujimura/fujimura.pdf\">Digital-Ticket-Controlled Digital Ticket Circulation, USENIX Security Symposium</a>で発表したものです。2023年にEthereumプラットフォーム上で簡単に実現できることに気が付き、ERC7303を出版しました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>藤村</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2024-01-15 12:10:08",
+    "modified": "2024-01-15 15:48:25",
+    "slug": "%e3%83%96%e3%83%ad%e3%83%83%e3%82%af%e3%83%81%e3%82%a7%e3%83%bc%e3%83%b3%e3%81%ab%e3%82%88%e3%82%8bweb%e3%82%a2%e3%82%af%e3%82%bb%e3%82%b9%e3%81%ae%e8%aa%8d%e8%a8%bc",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "NFT"
+    ],
+    "tags": [
+      "ERC",
+      "NFT",
+      "ブロックチェーン"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1311",
+    "featuredImageId": 1314,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2024/01/ERC7303-Blog.png"
+  },
+  {
+    "id": 1273,
+    "title": "電子情報通信学会LOIS若手研究者賞を受賞",
+    "content": "<!-- wp:paragraph -->\n<p>2021年度卒業生の松本千里さんが、3月3日に開催された電子情報通信学会LOIS研究会で、卒業研究で行った「<a href=\"https://www.ieice.org/ken/paper/20220303OCJR/\">摘粒支援のためのブドウ果粒検出モデルの構築</a>」を発表しました。この研究は、シャインマスカットなどの生食用ブドウの摘粒作業を支援するためカメラ画像からブドウの粒の数を高精度で推定するものです。これを実現するため、実際に農園で多くのブドウを撮影して、一つ一つの画像に正解データを付与して、深層学習による学習モデルを構築しました。この発表は、2022年5月6日にLOIS研究会の３月研究会における<a href=\"https://www.ieice.org/iss/ois/jpn/oiscomm.html\">LOISグッドプレゼンテーション賞</a>に選ばれておりましたが、2023年8月4日に開催されたLOIS研究会で2022年の<a href=\"https://www.ieice.org/iss/ois/jpn/oiscomm.html\">LOIS若手研究者賞</a>を受賞しました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1276,\"sizeSlug\":\"full\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-full\"><img src=\"https://web.fujimura.com/wp-content/uploads/2022/05/スクリーンショット-2022-05-29-17.28.54.png\" alt=\"ブドウ粒の認識\" class=\"wp-image-1276\"/></figure>\n<!-- /wp:image -->",
+    "excerpt": "",
+    "date": "2023-08-04 17:16:00",
+    "modified": "2023-08-05 17:00:43",
+    "slug": "%e9%9b%bb%e5%ad%90%e6%83%85%e5%a0%b1%e9%80%9a%e4%bf%a1%e5%ad%a6%e4%bc%9alois%e7%a0%94%e7%a9%b6%e4%bc%9a%e3%81%a7%e7%99%ba%e8%a1%a8",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "AI"
+    ],
+    "tags": [
+      "LOIS",
+      "卒業研究",
+      "深層学習"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1273",
+    "featuredImageId": 1276,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2022/05/スクリーンショット-2022-05-29-17.28.54.png"
+  },
+  {
+    "id": 1300,
+    "title": "Maker Faire Tokyo 2023に向けたプロジェクト開始",
+    "content": "<!-- wp:paragraph -->\n<p>今年も10/14-15に東京ビッグサイトで開催されるMaker Faire Tokyo 2023に向けた開発が開始されました。現在、出展申込みを行った段階ですので、まだ、出展が決まっていませんが、開発中のシステムの概要を以下に示します。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>OpenAIなどの生成AIとNFTを繋げた展示となる予定です。作品が完成しましたら、このページで報告予定です。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1301,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://web.fujimura.com/wp-content/uploads/2023/06/ParroTokenポスター-724x1024.png\" alt=\"\" class=\"wp-image-1301\"/></figure>\n<!-- /wp:image -->",
+    "excerpt": "",
+    "date": "2023-06-06 17:58:13",
+    "modified": "2023-08-05 16:51:30",
+    "slug": "maker-faire-tokyo-2023%e3%81%ab%e5%90%91%e3%81%91%e3%81%9f%e3%83%97%e3%83%ad%e3%82%b8%e3%82%a7%e3%82%af%e3%83%88%e9%96%8b%e5%a7%8b",
+    "status": "draft",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "event",
+      "NFT"
+    ],
+    "tags": [
+      "Maker Faire Tokyo",
+      "NFT",
+      "OpenAI",
+      "ParroToken",
+      "web3"
+    ],
+    "link": "https://web.fujimura.com/?p=1300",
+    "featuredImageId": 1302,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2023/06/ParroToken画像.png"
+  },
+  {
+    "id": 1295,
+    "title": "2022年度 卒業研究発表会",
+    "content": "<!-- wp:paragraph -->\n<p>2023年3月に卒業した藤村ゼミの10回目の卒業生の卒業研究発表会は1月30日に行われました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>今年の卒研発表会は３年ぶりに対面での発表会となりました。今年は11名9組の学生が以下のタイトルで発表しました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><!-- wp:list-item -->\n<li>VRに対応したNFTの売買システムの比較</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>NFT発行アプリの開発とその流通に関する調査</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>センサーの値を可視化する花のオブジェの制作（<a href=\"https://web.fujimura.com/wp-content/uploads/2023/06/スクリーンショット-2023-06-06-17.45.36.png\">写真</a>）</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>PoseNetを用いた姿勢の可視化</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>BLE電波強度を用いた自転車間距離の通知デバイスの開発</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>BLE電波強度を用いた顧客の滞在時間の推定</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>NFCタグで複数端末を連携させるサイネージデバイスの制作</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>Handposeと360度カメラを用いた写真撮影ツールの制作</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>画像認識を使ったペットのトイレの状態推定</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>また、「BLE電波強度を用いた顧客の滞在時間の推定」については専攻で制作した以下の概要の動画がありますので、ご覧ください。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:embed {\"url\":\"https://youtu.be/rqo3h-8FrcQ\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"responsive\":true,\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://youtu.be/rqo3h-8FrcQ\n</div></figure>\n<!-- /wp:embed -->",
+    "excerpt": "",
+    "date": "2023-06-06 17:47:10",
+    "modified": "2023-06-06 17:50:13",
+    "slug": "2022%e5%b9%b4%e5%ba%a6-%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e7%99%ba%e8%a1%a8%e4%bc%9a",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "卒業研究",
+      "発表会",
+      "AI"
+    ],
+    "tags": [
+      "卒業研究"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1295",
+    "featuredImageId": 1296,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2023/06/スクリーンショット-2023-06-06-17.45.36.png"
+  },
+  {
+    "id": 1282,
+    "title": "Maker Faire Tokyo 2022に出展しました",
+    "content": "<!-- wp:paragraph -->\n<p>Maker Faire Tokyo 2022は東京ビッグサイトで9/3-4で開催されました。本ゼミでは３年生と４年生が協力して、本年もダストセンサーを活用したオブジェ「ほこりっち＆」という作品を出展しました。この作品は、2021に出展した「ほこりっち」のアップデイト版ですが、本年度はNFTと連携をテーマとし、特定のNFTを持っている人のみが使用できるIoTデバイスを作成しました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1286,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://web.fujimura.com/wp-content/uploads/2022/12/FbtDPzrUYAEBSh3.jpeg\" alt=\"ほこりっち＆\" class=\"wp-image-1286\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>NFTを持っている人のみがダストセンサーの観測できる、すなわち「センサーの観測権」をNFTとして流通させるものです。詳細は以下をご覧ください。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1287,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://web.fujimura.com/wp-content/uploads/2022/12/FbtDVb0UEAEViWj.jpeg\" alt=\"\" class=\"wp-image-1287\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:image {\"id\":1284,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://web.fujimura.com/wp-content/uploads/2022/12/FbtDbmeVsAAQEwY.jpeg\" alt=\"\" class=\"wp-image-1284\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:image {\"id\":1285,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://web.fujimura.com/wp-content/uploads/2022/12/FbtDen0VsAA33u_.jpeg\" alt=\"ほこりっちのデザイン\" class=\"wp-image-1285\"/></figure>\n<!-- /wp:image -->",
+    "excerpt": "",
+    "date": "2022-12-17 13:57:26",
+    "modified": "2022-12-17 14:04:48",
+    "slug": "maker-faire-tokyo-2022%e3%81%ab%e5%87%ba%e5%b1%95%e3%81%97%e3%81%be%e3%81%97%e3%81%9f",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "media art",
+      "NFT"
+    ],
+    "tags": [
+      "IoT",
+      "MakerFaireTokyo",
+      "NFT",
+      "ゼミ",
+      "ダストセンサー",
+      "ほこりっち"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1282",
+    "featuredImageId": 1286,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2022/12/FbtDPzrUYAEBSh3.jpeg"
+  },
+  {
+    "id": 1267,
+    "title": "2021年度 卒業研究発表会",
+    "content": "<!-- wp:paragraph -->\n<p>2022年3月に卒業した藤村ゼミの9回目の卒業生の卒業研究発表会は2月9日に行われました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>今年の卒研発表会も昨年度と同じく、コロナ禍の下での発表となったため、オンライン発表となりました。今年は15名の学生が以下のタイトルで発表しました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>LINE Beaconを用いた時間管理システムの開発</li><li>OCRを用いた食品の消費期限管理システム</li><li>買い物を支援する価格情報共有LINE Botの制作</li><li>ジェスチャによる非接触操作システムの開発と評価</li><li>ビデオチャットにおける顔への落書きツールの開発</li><li>摘粒支援のためのブドウ果粒検出モデルの構築</li><li>Reactを用いた直感的レーダーチャートの作成</li><li>3D Avatarを設置するReact Componentの実装</li><li>Three.jsを用いたVRサウンドビジュアライザの開発</li><li>画像の代表色をイラストに自動着色するシステム</li><li>湿度に応える光のオブジェの制作（<a href=\"https://web.fujimura.com/wp-content/uploads/2022/05/スクリーンショット-2022-05-29-16.25.01.png\">写真</a>）</li><li>音声認識を用いた照明による単語の視覚化</li><li>ダストセンサーを用いた掃除管理LINE Botアプリ</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>このうち、「摘粒支援のためのブドウ果粒検出モデルの構築」に関しては、詳細は<a rel=\"noreferrer noopener\" href=\"https://web.fujimura.com/blog/archives/1273\" target=\"_blank\">こちらの記事</a>をご覧ください。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>また、「ダストセンサーを用いた掃除管理LINE Botアプリ」については専攻で制作した以下の概要の動画がありますので、ご覧ください。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:embed {\"url\":\"https://youtu.be/ffnFGBUj-no\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"responsive\":true,\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://youtu.be/ffnFGBUj-no\n</div></figure>\n<!-- /wp:embed -->",
+    "excerpt": "",
+    "date": "2022-05-29 16:06:34",
+    "modified": "2022-05-29 17:43:13",
+    "slug": "2021%e5%b9%b4%e5%ba%a6-%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e7%99%ba%e8%a1%a8%e4%bc%9a",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "卒業研究",
+      "発表会"
+    ],
+    "tags": [],
+    "link": "https://web.fujimura.com/blog/archives/1267",
+    "featuredImageId": 1270,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2022/05/スクリーンショット-2022-05-29-16.25.01.png"
+  },
+  {
+    "id": 1250,
+    "title": "Maker Faire Tokyo 2021にオンライン出展しました",
+    "content": "<!-- wp:image {\"id\":1256,\"sizeSlug\":\"large\",\"linkDestination\":\"none\",\"className\":\"is-style-default\"} -->\n<figure class=\"wp-block-image size-large is-style-default\"><img src=\"https://web.fujimura.com/wp-content/uploads/2021/10/17257e4ebbbbb8e4f2d804ef073af637.png\" alt=\"\" class=\"wp-image-1256\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>2021年のMaker Faire Tokyoは東京ビックサイトで10/2-3で開催を予定しておりましたが、オンラインに変更となりました。本ゼミはからダストセンサーを活用したオブジェ「<a href=\"https://makezine.jp/event/makers-mft2021/m0070/\">ほこりっち</a>」という作品をオンラインで出展しました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>オンラインイベントでの当ゼミからの発表は、#MFTokyo2021、#作品発表というハッシュタグで指定した時刻に配信するのみとなりました。学生が制作した作品の詳細は、<a href=\"https://twitter.com/fujimu_lab/status/1444195446960771083\">こちら</a>をご覧ください。ダストセンサーから取得したホコリのデータはGoogle Apps Scriptを使用してGoogleプレッドシートに記録しています。現在、人間の行動とホコリの発生の関係を分析する研究を行っています。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>上記は学生がmicro:bit等を用いて制作した作品ですが、私も、<a href=\"https://obniz.com/ja/\">obniz</a>と<a href=\"https://www.switch-science.com/catalog/7360/\">M5Stamp</a>を使用してホコリを可視化する作品を制作してみました。M5Stampというデバイスは切手サイズで無線LANにも繋げられる便利なデバイスです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:embed {\"url\":\"https://youtu.be/heeFwjAoW78\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"responsive\":true,\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://youtu.be/heeFwjAoW78\n</div></figure>\n<!-- /wp:embed -->\n\n<!-- wp:paragraph -->\n<p>当ゼミでは今後もダストセンサーを活用したアプリの制作を行っていきたいと考えております。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>それから、Maker Faire Tokyo 2021では「たのしいmicro:bitコンテスト2021」が開催され、本ゼミからも３年生が以下の作品「水分補給を促すペットボトルホルダー」を応募しております。受賞はできませんでしたが、夏期休暇期間の短い期間で完成させることができました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:embed {\"url\":\"https://youtu.be/6nuOXBltEuY\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"responsive\":true,\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://youtu.be/6nuOXBltEuY\n</div></figure>\n<!-- /wp:embed -->",
+    "excerpt": "",
+    "date": "2021-10-11 12:10:00",
+    "modified": "2021-10-11 15:44:05",
+    "slug": "maker-faire-tokyo-2021%e5%87%ba%e5%b1%95%e6%ba%96%e5%82%99",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "event",
+      "media art",
+      "programming"
+    ],
+    "tags": [
+      "Dust Sensor",
+      "M5Stamp",
+      "Maker Faire Tokyo",
+      "MFTokyo2021",
+      "Obniz"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1250",
+    "featuredImageId": 1253,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2021/06/hokorich-s.png"
+  },
+  {
+    "id": 1240,
+    "title": "2020年度 卒業研究発表会",
+    "content": "<!-- wp:paragraph -->\n<p>2021年3月に卒業した藤村ゼミの8回目の卒業生の卒業研究発表会は2月8日に行われました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>今年度の卒研発表会はコロナ禍の下での発表のため、オンライン発表となりましたが、12名で全員無事発表することができました。卒研のタイトル（発表順）を以下に紹介します。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>ジャンル別に映画作品を提案するLINE Bot</li><li>個人感覚に基づく音楽ジャンルの３Dの可視化</li><li>LINE Messaging APIを用いた作業効率化アプリの開発</li><li>スケジュール情報の３D表現</li><li>消耗品の残量をLINE Botで通知するシステムの開発</li><li>ポーズで動画を再生するインタラクティブメディアの制作</li><li>気温に応じたレシピを提案するLINE Botの開発</li><li>飲食店検索におけるバリアフリー情報の共有機能の実現</li><li>転移学習を用いた猫用の玩具の制作（２名の共同）</li><li>転移学習を用いたWeb会議のための居眠り検知機能の開発</li><li>姿勢推定モデルによる行動習慣改善アプリの制作</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>このうち、「<a href=\"https://protopedia.net/prototype/2033\">転移学習を用いた猫用の玩具の制作</a>」と「<a href=\"https://protopedia.net/prototype/2073\">ポーズで動画を再生するインタラクティブメディア</a>」については、作品を<a href=\"https://heroes-league.net/\">ヒーローズリーグ2020</a>への投稿・応募しましたので、詳細は上記のリンクをご覧下さい。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1245,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://web.fujimura.com/wp-content/uploads/2021/06/cat-interface-01.jpeg\" alt=\"cat-interface\" class=\"wp-image-1245\"/><figcaption>ヒーローズリーグ2020投稿作品「キャッ！と驚くインタフェース」</figcaption></figure>\n<!-- /wp:image -->\n\n<!-- wp:image {\"id\":1244,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://web.fujimura.com/wp-content/uploads/2021/06/henshin-pose-maker-02.png\" alt=\"\" class=\"wp-image-1244\"/><figcaption>ヒーローズリーグ2020投稿作品「変身ポーズメーカー」</figcaption></figure>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>また、「気温に応じたレシピを提案するLINE Botの開発」については専攻で制作した以下の概要の動画がありますので、ご覧ください。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:embed {\"url\":\"https://youtu.be/MinD2P3Zuc4\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"responsive\":true,\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://youtu.be/MinD2P3Zuc4\n</div></figure>\n<!-- /wp:embed -->",
+    "excerpt": "",
+    "date": "2021-06-13 15:44:57",
+    "modified": "2022-05-29 15:48:39",
+    "slug": "2020%e5%b9%b4%e5%ba%a6-%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e7%99%ba%e8%a1%a8%e4%bc%9a",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "卒業研究",
+      "発表会"
+    ],
+    "tags": [],
+    "link": "https://web.fujimura.com/blog/archives/1240",
+    "featuredImageId": 1245,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2021/06/cat-interface-01.jpeg"
+  },
+  {
+    "id": 1232,
+    "title": "2019年度 卒業研究発表会",
+    "content": "<!-- wp:paragraph -->\n<p>2019年3月に卒業した藤村ゼミの7回目の卒業生の卒業研究発表会は1月28日に行われました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>今年度の当ゼミの卒業生は11名で全員無事発表することができました。卒研のタイトル（発表順）を以下に紹介します。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>加速度センサを用いた仮想風鈴の共有サイトの実現（２名の共同）</li><li>簡単に記録できる健康管理カレンダーの実現</li><li>音声認識ドローイングツールの実現（２名の共同）</li><li>画像認識を用いた眼鏡のくもりを取るシステム</li><li>仮想風暖簾の制作とバーチャル体験に関する考察</li><li>Fitbit APIを用いた照明による心拍の可視化（３名の共同）</li><li>温度を可視化する絵画フレームの制作</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>このうち、許可いただいた卒業制作作品（１番目の発表）の<a href=\"https://docs.google.com/presentation/d/1TQpB-5eJ4g9ryLMmNXZFwUwVL3Z2DjYPWlaqZFwKyMY/edit?usp=sharing\">スライド</a>と概要です。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1236,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://web.fujimura.com/wp-content/uploads/2021/06/sotsuken2019-01.png\" alt=\"遠隔風鈴キャプチャ\" class=\"wp-image-1236\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:image {\"id\":1237,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://web.fujimura.com/wp-content/uploads/2021/06/sotsuken-2019-02.jpeg\" alt=\"遠隔風鈴センサ\" class=\"wp-image-1237\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>【概要】本研究では、夏の風物詩となっている「風鈴祭り」をイメージとした、自然や時間の流れを感じられるメディアアートである。「風鈴祭り」は、毎年夏に全国各地で行われ、風鈴の澄んだ音色と、短冊が風に揺れる様子により涼しさを感じられる祭りである。遠隔地で行われるこのお祭りを、より身近に感じられる作品を制作したいと考えた。そこで、風鈴が目の前に無くても涼しさを感じることができる作品とすることを目指し、物理的に離れた風鈴の動きを読み取りネットワークを介して仮想空間上の３Dアート作品として表現することにした。これにより、そして、全国各地の「空間」に分散した風鈴の動きにより完成されたアート作品は、現実世界のしがらみを癒す、涼しげな空間を与えることができるものになった。　</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>制作にあたり、micro:bitの加速度センサとJavaScriptの3DCGライブラリであるthree.jsの２つを利用した。micro:bitの加速度センサは、WebBluetoothを使ってWebブラウザで加速度センサーの値を取得することができる。これにより、風の動きを数値化した。three.jsは、三次元空間の表現が可能になるため、風鈴の３Dモデルを動かすことができる。こうして表現されたものを「仮想風鈴」と呼び、物理的に離れた多数の「仮想風鈴」を一つのWebページ上に表示可能にし、各地域の風を感じることができるアート作品となった。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>作品に受け手が関与するインタラクティブなメディアアートの多くは、作品に鑑賞者が直接インタラクションをすることで作品が完成する仕組みである。しかし、今回の作品では鑑賞者自身ではなく遠隔地にある複数の「仮想風鈴」という媒体を通じて一つの作品を完成させている。これは、一つの表現方法として新しい取り組みである。これにより、風鈴を並べて眺めれば良いものをわざわざアート作品に組み込んでWeb上で風鈴を眺めるという取るに足りない発想を実現し、現代アートの小難しく近寄りがたい印象から親しみやすくすることができた。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2021-06-13 15:02:54",
+    "modified": "2021-06-13 15:17:39",
+    "slug": "2019%e5%b9%b4%e5%ba%a6-%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e7%99%ba%e8%a1%a8%e4%bc%9a",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "卒業研究",
+      "発表会"
+    ],
+    "tags": [
+      "卒業制作"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1232",
+    "featuredImageId": 1236,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2021/06/sotsuken2019-01.png"
+  },
+  {
+    "id": 1217,
+    "title": "Maker Faire Tokyo 2019に出展しました",
+    "content": "<!-- wp:paragraph -->\n<p>Maker Faire Tokyo 2018には「micro:bitで作ってみようコンテスト」に<a href=\"https://web.fujimura.com/blog/archives/1051\">応募・出展</a>しましたが、今年は藤村個人ではなく、学生が主体となり、ゼミとして参加することになりました。本年度の作品のテーマは「風明」です。 「風鈴」は風で音を発生します。それに対して「風明」は風で光を発生する新しいデバイスです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>今回、リアルな「風」ではなく、うちわ型デバイスで「仮想の風」を送ると、「風明」が順番に光り、風が通り過ぎるように感じさせる作品を作ることになりました。制作を続けていくうちに他にも作りたい作品のアイデアが生まれ、最終的には、７種類の作品を制作しました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>この作品全体で13 台のmicro:bit が無線通信で連携して動いています。micro:bitの無線通信はペアリングが不要なのが使いやすいですね。ちなみに、バックヤードで本物の風で風鈴を動かし音を出しています。 </p>\n<!-- /wp:paragraph -->\n\n<!-- wp:core-embed/youtube {\"url\":\"https://www.youtube.com/watch?v=wAx-kweEvsQ\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed-youtube wp-block-embed is-type-video is-provider-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://www.youtube.com/watch?v=wAx-kweEvsQ\n</div></figure>\n<!-- /wp:core-embed/youtube -->\n\n<!-- wp:paragraph -->\n<p>全体構成図を以下に示します。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1227} -->\n<figure class=\"wp-block-image\"><img src=\"https://web.fujimura.com/wp-content/uploads/2019/05/MFT2019ohta.jpg\" alt=\"\" class=\"wp-image-1227\"/></figure>\n<!-- /wp:image -->",
+    "excerpt": "",
+    "date": "2019-05-07 17:36:52",
+    "modified": "2019-08-09 18:25:00",
+    "slug": "%e3%80%8c%e9%a2%a8%e6%98%8e%e3%80%8d%e3%83%97%e3%83%ad%e3%82%b8%e3%82%a7%e3%82%af%e3%83%88%e5%a7%8b%e5%8b%95",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "art",
+      "media art",
+      "programming",
+      "visualization"
+    ],
+    "tags": [
+      "LED",
+      "Maker Faire Tokyo 2019",
+      "micro:bit",
+      "NeoPixel",
+      "風",
+      "風明",
+      "風鈴"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1217",
+    "featuredImageId": 1225,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2019/05/IMG_20190803_120105.jpg"
+  },
+  {
+    "id": 1090,
+    "title": "2018年度 卒業研究発表会",
+    "content": "<!-- wp:paragraph -->\n<p> 2018年3月に卒業した藤村ゼミの6回目の卒業生の卒業研究発表会は1月29日に行われました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>今年度の当ゼミの卒業生は11名で全員無事発表することができました。卒研のタイトル（発表順）を以下に紹介します。   </p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>縫い目の制約を考慮した洋服のデザイン生成アルゴリズム</li><li>洋服の使用履歴を蓄積するWebアプリケーション</li><li>PoseNetを利用したインタラクティブな音とダンスの融合（※）</li><li>Unityとmicro:bit間のBluetooth通信の実現</li><li>旅行計画をサポートするLINE botアプリ</li><li>振動でルートを伝える地図アプリ</li><li>micro:bitを使用したフラフープの回転数の可視化</li><li>植木型インタフェースによるリアルタイムデータの可視化</li><li>重さセンサを用いた猫のトイレ管理デバイス</li><li>ユーザー投稿型のデジタルサイネージシステムの開発</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>このうち、掲載を許可いただいた荻原さんの卒業制作作品（３番目の発表）の動画と概要です。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:core-embed/youtube {\"url\":\"https://www.youtube.com/watch?v=Iw4JVuBZa7k\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed-youtube wp-block-embed is-type-video is-provider-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://www.youtube.com/watch?v=Iw4JVuBZa7k\n</div><figcaption> <br>※PoseNetを利用したインタラクティブな音とダンスの融合 </figcaption></figure>\n<!-- /wp:core-embed/youtube -->\n\n<!-- wp:paragraph -->\n<p>【概要】自由に身体を動かして表現することを楽しんでもらえる環境を提供するため、映像が身体の動きに反応して追従するインタラクティブな映像空間をつくりました。画像から骨格の位置を推定するPoseNetというライブラリで身体の動きを取得して、WebGLとthree.jsライブラリを使って身体の動きに反応する粒子を３D空間に配置しました。音源も制作しました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2019-04-09 16:46:18",
+    "modified": "2019-04-11 13:42:37",
+    "slug": "%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e3%81%ae%e3%82%bf%e3%82%a4%e3%83%88%e3%83%ab%e3%83%bc2018%e3%83%bc",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "media art",
+      "programming",
+      "卒業研究",
+      "発表会"
+    ],
+    "tags": [
+      "dance",
+      "卒業研究"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1090",
+    "featuredImageId": 1066,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2018/04/ogihara.jpg"
+  },
+  {
+    "id": 1087,
+    "title": "Webサーバを更改しました",
+    "content": "<!-- wp:paragraph -->\n<p>これまでAmazon AWS上で動かしてきた本WebサイトをGCP(Google Cloud Platform)に移転しました。ついでにWordPressを最新版に変更するとともに、デザインもシンプルなものに変更しました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>また、Webサーバもこれまで使用してきたApacheをやめてnginxとnode.jsの両方を立てております。WordPressはnginxで動かし、それ以外のアプリはnode.jsのサーバを使用しています。nginxを使用することにより、リバースプロキシが簡単に設置でき、アプリ毎に異なるnode.jsサーバにリクエストを分配できるようになりました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>さらに、<a href=\"https://letsencrypt.org/\">Let's Encrypt</a>の証明書を用いたhttps化も行いました。一年前に別サイトで使用していましたが、更に簡単になっていて驚きました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>これまで使用してきたWordPressの背景画像は平成27年度卒業の清田純菜さんに作っていただいた素晴らしい作品でしたので、記念にこれまでのトップ画面のキャプチャを以下に掲載しておきます。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1073} -->\n<figure class=\"wp-block-image\"><img src=\"https://web.fujimura.com/wp-content/uploads/2019/04/web-fujimura-com-2018.png\" alt=\"\" class=\"wp-image-1073\"/></figure>\n<!-- /wp:image -->",
+    "excerpt": "",
+    "date": "2019-04-09 16:22:53",
+    "modified": "2019-04-09 17:11:25",
+    "slug": "web%e3%82%b5%e3%83%bc%e3%83%90%e3%82%92%e6%9b%b4%e6%94%b9%e3%81%97%e3%81%be%e3%81%97%e3%81%9f",
+    "status": "publish",
+    "type": "post",
+    "author": "ko",
+    "categories": [
+      "web",
+      "wordpress"
+    ],
+    "tags": [
+      "GCP",
+      "nginx",
+      "nodejs",
+      "Webサーバ"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1087",
+    "featuredImageId": 966,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2016/04/zemihai-1.jpg"
+  },
+  {
+    "id": 1051,
+    "title": "micro:bitをVRゲームのコントローラに",
+    "content": "<!-- wp:image {\"id\":1052} -->\n<figure class=\"wp-block-image\"><img src=\"https://web.fujimura.com/wp-content/uploads/2018/10/VRfishing.jpg\" alt=\"\" class=\"wp-image-1052\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>本作品はWebページからBluetoothによる通信を可能にするWebbluetoothという規格を使って、Webページと<a href=\"https://microbit.org/ja/guide/\">micro:bit</a>を接続し、micro:bitをWebVRのコントローラとして活用するものです。WebVRとはVRをWebブラウザ上に実現する機能で、最近、Android版Chromeでリリースされました。WebVRはブラウザ上で動作するため、アプリのインストールが不要というメリットがあります。今回はmicro:bitの加速度センサを使ってVR内の釣り竿を動かすコントローラを制作してみました。<br></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p> 本作品は、今年の夏開催された「<a href=\"http://makezine.jp/blog/2018/04/microbitcontest2018.html\">micro:bitで作ってみようコンテスト</a>」に応募して特別賞をいただくことができ、東京ビックサイトで開催されたMaker Faire Tokyo 2018で展示させていただく機会をいただくことができました。より詳しい説明用のビデオをアップしましたので、ご覧いただければ幸いです。また、プログラムのコードは<a href=\"https://github.com/kofujimura/microbit-vrfishing\">こちら</a>にアップしております。 </p>\n<!-- /wp:paragraph -->\n\n<!-- wp:core-embed/youtube {\"url\":\"https://www.youtube.com/watch?v=nGMNKAHnCRg\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed-youtube wp-block-embed is-type-video is-provider-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://www.youtube.com/watch?v=nGMNKAHnCRg\n</div></figure>\n<!-- /wp:core-embed/youtube -->\n\n<!-- wp:paragraph -->\n<p>\n\nmicro:bitとWebを連携することで様々な面白い作品が作れます。本ゼミではこれ以外にもたくさんのプロジェクトが進行中です。\n\n</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2018-10-11 19:45:45",
+    "modified": "2019-04-10 16:33:09",
+    "slug": "microbit-vr",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "JavaScript",
+      "programming",
+      "web"
+    ],
+    "tags": [
+      "micro:bit",
+      "VR",
+      "Webbluetooth"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1051",
+    "featuredImageId": 1052,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2018/10/VRfishing.jpg"
+  },
+  {
+    "id": 1048,
+    "title": "2017年度 卒業研究発表会",
+    "content": "<!-- wp:paragraph -->\n<p>2018年3月に卒業した藤村ゼミの5回目の卒業生の卒業研究発表会は1月29日に行われました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>今年度の当ゼミの卒業生は10名で全員無事発表することができました。卒研のタイトル（発表順）を以下に紹介します。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>【Webプログラミング】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>Twitterと単語解析を利用した音楽の可視化</li><li>メールに含まれる数量データの抽出と可視化</li><li>全国のロケ地情報を集約するWebサイトの開発</li><li>コミュニケーションを表す３Dアートの制作</li><li>感性を表現できる仮想オーディオルームの制作</li><li>LeapMotionとカメラによる体験型メディアアートの制作</li><li>VRを活用した写真展示形態の検討</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>【IoT】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>重さセンサを備えた目覚まし時計制作</li><li>メッセージ機能を備えたIoT貯金箱の制作</li><li>micro:bitを活用した3Dモデルのコントローラ</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>このうち、Aさんの作品の写真と概要を以下で紹介します。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1147,\"align\":\"center\",\"width\":320,\"height\":568} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter is-resized\"><img src=\"https://web.fujimura.com/wp-content/uploads/2019/04/image5.png\" alt=\"\" class=\"wp-image-1147\" width=\"320\" height=\"568\"/></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>【概要】本研究は、ブラウザ上で3DCGを動作することができるプログラミング言語JavaScriptのライブラリであるthree.jsを用いて、3D空間にLINEなどにおけるグループコミュニケーションを、参加の自由度を狭めずに表現することを目的とした。本研究の成果はLINEに変わる新たなコミュニケーションをデザインする他にも、LINE Messaging APIを使ってLINEのグループチャットの可視化に活用するなどの応用も考えられる。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>作品の制作には、チャットルームなどの3D空間はthree.jsで作成し、アバターやチャットの吹き出しはLINEを意識するとともに3Dの動作コスト軽量化のため、2Dを3次元に起こすようにした。個々のアバター間の平面配置はJavaScriptのライブラリであるD3.jsのForce-directed layoutを用いて算出している。メッセージの送受信には、WebSocketを用いて実装し、ブラウザ上によるリアルタイムのチャットを可能にした。メッセージによる吹き出しが3D空間上にどのように配置するかは重要であるが、本作品ではLINEと同じ最新のメッセージが下で、古いメッセージが上に配置するようにした。さらに、チャット参加者の感情を表現するため、従来のスタンプに変わってアバターであるアイコンを感情に応じて変化されるインタフェースを導入した。この結果、LINEのスタンプがもたらす感情の表現を活かしつつ、3D空間にアバターが生きているような臨場感を表現し、より感情を伝える新たなコミュニケーションの確立ができた。また、フル3Dにするのではなく、2Dと組み合わせることで軽量化が達成できた。<br></p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2018-04-24 14:27:27",
+    "modified": "2019-04-10 18:19:34",
+    "slug": "%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e3%81%ae%e3%82%bf%e3%82%a4%e3%83%88%e3%83%ab%e3%83%bc2017%e3%83%bc",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "event",
+      "programming"
+    ],
+    "tags": [
+      "ゼミ",
+      "卒研"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1048",
+    "featuredImageId": 1148,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2019/04/image8.png"
+  },
+  {
+    "id": 1045,
+    "title": "2016年度 卒業研究発表会",
+    "content": "<!-- wp:paragraph -->\n<p>本サイトの更新がしばらく途絶えてしまっておりました。これからはもっと頻繁に更新したいと思います。かなり前の情報となりますが、2017年3月に卒業した藤村ゼミの４回目の卒業生の卒業研究のタイトルを紹介します。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>【IoT】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>Arduinoを使った植物管理Webサイトの制作</li><li>Web Bluetoothの活用方法に関する研究</li><li>カメラによる感情推定スマートミラーの制作</li><li>指先間の距離に基づく手の形の認識とその応用</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>【Webプログラミング】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>Google Sheets APIを使った商品比較サイトの制作</li><li>単語からパレットを生成するペイントツールの開発</li><li>three.jsにおける3Dモデルの発光表現支援ライブラリ</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>このうち、Iさんの「単語からパレットを生成するペイントツールの開発」の概要を以下で紹介します。 </p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":1153,\"align\":\"center\",\"width\":375,\"height\":667} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter is-resized\"><img src=\"https://web.fujimura.com/wp-content/uploads/2019/04/image12.png\" alt=\"\" class=\"wp-image-1153\" width=\"375\" height=\"667\"/></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>【概要】これまでのペイントツールでは、パレットが既定の種類しか提供されておらず、適切な色を選択するのが難しいという問題があった。PCにおけるペイントツールでは、スポイトツールと呼ぶ画像から色を取得する機能があり、画像検索によって探した画像からスポイトツールで色を選ぶという操作も可能であるが、特にスマートフォンでは指先での操作のため、細かい指定が難しい。そこで、本研究では、自分の好きな言葉や単語を入力すると、その言葉から連想される色を自動的に抽出して、パレットを生成する機能を開発した。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>これを実現するため、Flickr APIを利用して単語から連想される色を得る。Flickr APIを利用すると、写真共有サービスであるFlickrに投稿された画像データを簡単に取得できる。パレットを作りたい任意の単語をユーザーが入力することで、Flickrからその単語で検索した画像を複数枚取得する。取得した画像をブラウザ上に表示し、JavaScriptライブラリを用いて、クリックした画像に使われている色(RGB)情報を調べてk-meansと呼ぶクラスタリング手法により、指定の色数に減色することで、パレットに使用する色を求めることができた。パレットそのものの描画やペイント機能の部分は、canvasを利用した描画処理を簡単にプログラミングできるJavaScriptライブラリであるp5.jsを用いてプログラミングしている。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2018-04-24 14:21:21",
+    "modified": "2019-04-10 18:27:44",
+    "slug": "%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e3%81%ae%e3%82%bf%e3%82%a4%e3%83%88%e3%83%ab%e3%83%bc2016%e3%83%bc",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "event",
+      "programming"
+    ],
+    "tags": [
+      "ゼミ",
+      "卒研"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1045",
+    "featuredImageId": 1081,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2018/04/IMG_2686.jpg"
+  },
+  {
+    "id": 1025,
+    "title": "TOKYO DESIGN WEEK 2016に出展",
+    "content": "当ゼミの３年生全員で、昨日から明治神宮外苑にて開催されております、TOKYO DESIGN WEEK 2016に作品「かがみらくる」を出展しています。開催期間は2016年10月26日〜11月7日 （※11月1日は休み）\n「かがみらくる」は鏡を使ったアート作品です。学校展示部門ではPairsというテーマが与えられております。私達はPairsから「対（つい）」を写し出す鏡を連想し、鏡を使用したメディアアートを制作しました。\n<img class=\"aligncenter wp-image-1030 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2016/10/IMG_20161026_161649.jpg\" alt=\"img_20161026_161649\" width=\"3264\" height=\"2448\" />手の動きを認識するLeapmotionを使用し、簡単で直感的な操作ができ、自分の一挙一動により模様が変化する様子を楽しむことができます。<img class=\"aligncenter wp-image-1029 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2016/10/1477541966497.jpg\" alt=\"1477541966497\" width=\"1478\" height=\"1108\" />\n映し出される映像は寄木細工風の模様で、私たちにとって思い入れがあります。ゼミ合宿で箱根に行き、そこで見た寄木細工の模様に私達は魅力を感じるとともに、Pairの要素を見出しました。寄木細工は1つ1つの形の組み合わせ、つまりペアが新たな模様を生み出していく様子を、私達は直線で構成される幾何学的な模様と、木工品を思わせる温かみのある色を組み合わせて表現しました。少し角度を変えて覗いてみると、右の写真のように合わせ鏡のごとく、模様が永遠に続いているようにも見ることができます。<img class=\"aligncenter wp-image-1028 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2016/10/1477542008333.jpg\" alt=\"1477542008333\" width=\"1478\" height=\"1108\" />\n他にも、二つのディスプレイで交互に明暗を切り変わるようにし、光の強さで透過度が変わるマジックミラーを合わせることで、普通の鏡では表現出来ない空間を作ることができました。こうして様々なpairが組み合わさって出来上がったのが、私たちの作品「かがみらくる」です。<img class=\"aligncenter wp-image-1027 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2016/10/1477541986183.jpg\" alt=\"1477541986183\" width=\"1478\" height=\"1108\" />\nさらに模様の配置も毎回ランダムとなっているので同じ組み合わせにはならず、その一瞬にしか表せない模様が出来ます。その映像が７枚の鏡に反射することによって、より幻想的な空間を再現することができました。\n執筆：３年ゼミ生",
+    "excerpt": "",
+    "date": "2016-10-27 14:57:05",
+    "modified": "2019-04-09 15:11:24",
+    "slug": "tokyo-design-week-2016%e3%81%ab%e5%87%ba%e5%b1%95",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "JavaScript",
+      "media art",
+      "programming"
+    ],
+    "tags": [
+      "TOKYO DESIGN WEEK",
+      "かがみらくる",
+      "フジムラボ"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1025",
+    "featuredImageId": 1030,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2016/10/IMG_20161026_161649.jpg"
+  },
+  {
+    "id": 1023,
+    "title": "2015年度 卒業研究発表会",
+    "content": "<!-- wp:paragraph -->\n<p>2016年3月に卒業した藤村ゼミの３回目の卒業生の卒研のタイトルを紹介します。<br></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>\n\n【Webプログラミング】\n\n</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>Leap motionを用いた直接的操作による3次元ゲームの制作</li><li>Leap motionとp5.jsを用いた音楽ゲームの制作</li><li>Kinectをwebアプリで利用する通信技術の開発</li><li>セマンティックWebを活用した植物図鑑の実現</li><li>CSS3によるWeb制作の可能性</li><li>洋服の試着シミュレーションアプリの制作</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>【メディアアート・テクノ手芸】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>人の動きを認識する安価な広告デバイスの制作</li><li>猫の鳴き声を認識するデバイスの制作（以下に動画）</li><li>three.jsを用いたwebサイトウォークスルーの実現</li><li>Instagramの写真を使用した3次元モザイクアートの制作</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>【データマイニングと可視化】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>three.jsを用いたレスポンシブグラフ可視化</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>このうち、Kさんの作品の動画を以下で紹介します。概要は説明するまでもなく、タイトルの通りです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:core-embed/youtube {\"url\":\"https://www.youtube.com/watch?v=OiywRqzE2Sg\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed-youtube wp-block-embed is-type-video is-provider-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://www.youtube.com/watch?v=OiywRqzE2Sg\n</div></figure>\n<!-- /wp:core-embed/youtube -->\n\n<!-- wp:paragraph -->\n<p>本作品ではマイクから取得する音声をスペクトル分析して特徴ベクトルを求め、予め記録した猫の鳴き声の特徴ベクトルとの類似度を算出し、類似度が高いとき餌がサーボモータで出るようにしています。ネットワークやPCは使わず、すべてArduinoのボードで単体で動作しています。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2016-10-20 21:54:04",
+    "modified": "2019-04-10 18:03:42",
+    "slug": "%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e3%81%ae%e3%82%bf%e3%82%a4%e3%83%88%e3%83%ab-2015",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "event",
+      "programming"
+    ],
+    "tags": [
+      "ゼミ",
+      "卒研"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/1023",
+    "featuredImageId": 1096,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2016/10/猫餌.png"
+  },
+  {
+    "id": 944,
+    "title": "大妻多摩祭「スペース★オータン」を出展",
+    "content": "<!-- wp:paragraph -->\n<p>10月17,18日は大妻女子大学の学園祭（多摩祭）。今回、ゼミで初めて出展しました。HTML5ベースで多人数参加型の音楽ゲームを制作しました。自分のスマホをコントローラとして3D空間上のキャラクタ（オータン）を動かすことができ、隕石を避けながら音楽に合わせてスマホを振ってジャンプし、地球への帰還を競うゲーム。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":946,\"align\":\"center\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><img src=\"https://web.fujimura.com/wp-content/uploads/2015/10/space-otan.png\" alt=\"space-otan\" class=\"wp-image-946\"/></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>3DCG処理はthree.js、音声処理はp5.js、コントローラはdeviceorientation 、通信はWebSocket等を利用しています。夏の合宿でゲームのアイデアをとりまとめ、３年生と４年生の共同作業で約１ヶ月で制作。背景画像やアイテム等もすべてオリジナル。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":947,\"align\":\"center\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><img src=\"https://web.fujimura.com/wp-content/uploads/2015/10/4f9d84aead2ff13ae1d63c85c7246c6b.jpg\" alt=\"\" class=\"wp-image-947\"/></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:image {\"id\":948,\"align\":\"center\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><img src=\"https://web.fujimura.com/wp-content/uploads/2015/10/002.jpg\" alt=\"\" class=\"wp-image-948\"/></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:core-embed/youtube {\"url\":\"https://www.youtube.com/watch?v=Dv3G-8-aLAc\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed-youtube wp-block-embed is-type-video is-provider-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttps://www.youtube.com/watch?v=Dv3G-8-aLAc\n</div><figcaption>多摩祭での様子</figcaption></figure>\n<!-- /wp:core-embed/youtube -->\n\n<!-- wp:image {\"id\":956,\"align\":\"center\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><img src=\"https://web.fujimura.com/wp-content/uploads/2015/10/IMG_20151018_162616.jpg\" alt=\"\" class=\"wp-image-956\"/></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>多摩祭では、来訪者の投票で選出する、模擬店総選挙というものがあるのですが、本展示は３位になりました。<br></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>さらに、本作品はマッシュアップアワード2015にも応募しております。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2015-10-17 23:44:55",
+    "modified": "2019-04-10 18:08:14",
+    "slug": "%e5%a4%a7%e5%a6%bb%e5%a4%9a%e6%91%a9%e7%a5%ad%e3%80%8c%e3%82%b9%e3%83%9a%e3%83%bc%e3%82%b9%e2%98%85%e3%82%aa%e3%83%bc%e3%82%bf%e3%83%b3%e3%80%8d%e3%82%92%e5%87%ba%e5%b1%95",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "event",
+      "programming",
+      "web"
+    ],
+    "tags": [],
+    "link": "https://web.fujimura.com/blog/archives/944",
+    "featuredImageId": 945,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2015/10/tamafes01.png"
+  },
+  {
+    "id": 932,
+    "title": "p5.jsとthree.jsによる音声に反応する3D再帰木",
+    "content": "HTML5では、PCのマイクやカメラから音声や映像を取得するMedia Streamと呼ぶインタフェースが提供されています。この機能はIE11やSafariでは、まだ実装されておらず、ChromeとFirefoxのみのサポートですが、今回、この機能を活用して、<a href=\"http://web.fujimura.com/blog/archives/924\" target=\"_blank\" rel=\"noopener noreferrer\">先週投稿したthree.jsによる3D再帰木</a>を、マイクから拾った音声に応じて動くようにしてみました。以下の画像をクリックすると、<a href=\"https://qa.fujimura.com/wp-content/uploads/2015/06/mediastream.png\">ブラウザがマイクを使用してよいか尋ねるダイアログボックスが表示</a>されますので、それをONにしてみて下さい。3D木が表示され音声に応じて動きます。YouTubeなどで音楽を流すと踊ります。\n<a href=\"https://kofujimura.github.io/SoundResponsiveTree/\"><img class=\"aligncenter wp-image-939 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2015/06/soundresponsivetree1.png\" alt=\"soundresponsivetree1\" width=\"1024\" height=\"768\" /></a>\n今回、<a href=\"http://p5js.org/\" target=\"_blank\" rel=\"noopener noreferrer\">p5.js</a>というライブラリを使ってMedia Stream APIを利用しました。p5.jsは、Processingに近いコーディングスタイルでアニメーションやメディア操作が容易に記述できるJavaScriptのライブラリで、昨年秋頃から大注目されています。p5.jsを使うと、Media Streaming APIが簡単に利用できるだけでなく、様々な他のJavaScriptライブラリとの連携も容易です。今回、3DモデルをWeb上で表示するthree.jsと組み合わせて実装しました。p5.jsのサウンドライブラリは、ボリュームだけでなくFFTによるスペクトル分析もできます。このサンプルでは、高音だと縦長の形状となり、ボリュームに応じて大きな木になるようにしてみました。詳細はソースコードをご覧ください。\n追記2016-05-10：Chrome が2016年1月のアップデート以降、httpsのサイト以外ではマイクの使用ができなくなりました。Firefoxも最近のアップデートで使用できなくなりました。qa.fujimura.comがhttps化されるまでの間はMicrosoft Edgeを使用ください。\n追記2017-01-23：qa.fujimura.comの上記サイトをhttps化して、動くようにしました。\n\n追記2019-04-09：リンク先をgithub Pagesに変更しました。",
+    "excerpt": "",
+    "date": "2015-06-06 23:22:00",
+    "modified": "2019-04-09 17:33:20",
+    "slug": "p5-js%e3%81%a8three-js%e3%81%ab%e3%82%88%e3%82%8b%e9%9f%b3%e5%a3%b0%e3%81%ab%e5%8f%8d%e5%bf%9c%e3%81%99%e3%82%8b3d%e5%86%8d%e5%b8%b0%e6%9c%a8",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "JavaScript",
+      "media art",
+      "programming",
+      "web"
+    ],
+    "tags": [
+      "HTML5",
+      "p5.js",
+      "recursive tree",
+      "Responsive tree",
+      "three.js"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/932",
+    "featuredImageId": 939,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2015/06/soundresponsivetree1.png"
+  },
+  {
+    "id": 910,
+    "title": "【卒研紹介】2014年度",
+    "content": "<p>今年の３月末、当ゼミから9名の第2期生が卒業しました。本日、メディアアート分野の以下の２つの卒業研究について専攻のサイトに紹介の記事を書きましたので、以下をクリックして読んでいただければ幸いです。</p>\n<ul>\n<li><a href=\"http://www.sis.otsuma.ac.jp/i-design/?p=1270\" target=\"_blank\" rel=\"noopener noreferrer\">TwitterとLeap Motionによるジェネラティブ・ミュージックの制作</a></li>\n<li><a href=\"http://www.sis.otsuma.ac.jp/i-design/?p=1296\" target=\"_blank\" rel=\"noopener noreferrer\">リアルタイムに音楽に反応する光のアートの制作</a></li>\n</ul>\n<p><a href=\"http://www.sis.otsuma.ac.jp/i-design/?p=1296\"><img class=\"alignnone wp-image-911 size-full\" src=\"https://web.fujimura.com/wp-content/uploads/2015/03/responsivecostume.png\" alt=\"responsivecostume\" width=\"1334\" height=\"896\" /></a></p>\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2015-03-29 18:19:23",
+    "modified": "2019-04-09 17:43:23",
+    "slug": "%e3%80%90%e5%8d%92%e7%a0%94%e7%b4%b9%e4%bb%8b%e3%80%912014%e5%b9%b4%e5%ba%a6",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "media art"
+    ],
+    "tags": [
+      "generative art",
+      "ジェネラティブ",
+      "テクノ手芸",
+      "卒業研究"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/910",
+    "featuredImageId": 911,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2015/03/responsivecostume.png"
+  },
+  {
+    "id": 885,
+    "title": "第１８回　文化庁メディア芸術祭",
+    "content": "<!-- wp:paragraph -->\n<p>今年もメディア芸術祭に行ってきました。メディア芸術祭の応募条件は、2013年9月13日（金）から2014年9月2日（火）までの間に完成、または発表された作品ということで、既に別のイベントや商業作品として公開されている作品も応募できるため、2014年を代表する作品が鑑賞できるイベントです。ただし、今年はアート部門の大賞が該当なしとの事で、確かに全体的には少しインパクトに欠ける印象を受けました。<br></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p> 最も印象に残ったのは「<a rel=\"noreferrer noopener\" href=\"http://noramoji.jp/\" target=\"_blank\">のらもじ発見プロジェクト</a>」という作品でした。ただし、これは既に東京TDC賞2014 RGB賞部門を受賞している作品ということで、メディアアートに関心のある方には既に広く知られている作品です。この作品の面白さは、看板の３文字から６文字程度の文字から、フォントの特徴を抽出し、50音のフォントを生成し、任意の言葉を看板にすることを可能にするというアイデアにあると思います。現在はフォント生成の部分は手動で行っているようですが、将来はこの部分を自動化するアルゴリズムも生まれるのではないでしょうか。この作品には無関係ですが、世の中には手書き文字からフォントを自動生成する<a rel=\"noreferrer noopener\" href=\"https://www.est.co.jp/orenji/about/about2.htm\" target=\"_blank\">ソフト</a>もあるようです。それから、twitterで<a href=\"https://twitter.com/hashtag/noramoji?src=hash\">#noramojiというハッシュタグ</a>を使って街にある味わい深い文字を集めようという<a href=\"http://noramoji.jp/photostream/\">活動</a>も楽しいですね。ちなみに作者の一人の西村斉輝さんは<a rel=\"noreferrer noopener\" href=\"http://www.cinra.net/job/shigoto/20300\" target=\"_blank\">インタビュー記事</a>によれば、昔お笑い芸人を目指していたそうです。文化庁メディア芸術祭は2月15日（日）までです。 </p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":890} -->\n<figure class=\"wp-block-image\"><img src=\"https://web.fujimura.com/wp-content/uploads/2015/02/11.jpg\" alt=\"\" class=\"wp-image-890\"/></figure>\n<!-- /wp:image -->",
+    "excerpt": "",
+    "date": "2015-02-11 22:34:46",
+    "modified": "2019-04-09 17:47:40",
+    "slug": "%e7%ac%ac%ef%bc%91%ef%bc%98%e5%9b%9e%e3%80%80%e6%96%87%e5%8c%96%e5%ba%81%e3%83%a1%e3%83%87%e3%82%a3%e3%82%a2%e8%8a%b8%e8%a1%93%e7%a5%ad",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "media art"
+    ],
+    "tags": [
+      "文化庁メディア芸術祭"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/885",
+    "featuredImageId": 886,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2015/02/1.jpg"
+  },
+  {
+    "id": 880,
+    "title": "卒業研究の表題が決まりました -- 2014 --",
+    "content": "先日、本年度の４年生が取り組んでいる卒研のタイトルが決まりました。藤村ゼミが本学に来て２回目の卒業生となります。思わぬところで、うまくいかず進捗が遅れている人もありますが、それが卒業研究というものです。卒業研究は、成果より、努力がたいせつです。努力した分だけ、力がつくと思いますので、最後まで、あきらめず頑張りましょう。\n【データマイニングと可視化】\n<ul>\n \t<li>three.jsによる３Dインフォグラフィックスの制作</li>\n \t<li>現代の若い女性の雑誌の購読傾向の分析</li>\n</ul>\n【Webプログラミング】\n<ul>\n \t<li>LINE風インターフェースを用いたスマホ連携Webサイトの実現</li>\n \t<li>Raspberry Piによる家電製品のWebインタフェースの制作</li>\n</ul>\n【メディアアート・テクノ手芸】\n<ul>\n \t<li>Kinectセンサを用いたARお手玉の制作</li>\n \t<li>Kinectセンサを使った人の動きに反応する髪型シミュレーション</li>\n \t<li>多人数参加型のインスタレーションのためのAndroidアプリの制作</li>\n \t<li>TwitterとLeap Motionによるジェネラティブ・ミュージックの制作</li>\n \t<li>リアルタイムに音楽に反応する光のアートの制作</li>\n</ul>",
+    "excerpt": "",
+    "date": "2014-11-24 17:38:53",
+    "modified": "2019-04-09 17:59:27",
+    "slug": "%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e3%81%ae%e8%a1%a8%e9%a1%8c%e3%81%8c%e6%b1%ba%e3%81%be%e3%82%8a%e3%81%be%e3%81%97%e3%81%9f-2014",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "event",
+      "programming",
+      "visualization",
+      "web"
+    ],
+    "tags": [
+      "ゼミ",
+      "卒業研究"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/880",
+    "featuredImageId": 1109,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2019/04/twittermusic.png"
+  },
+  {
+    "id": 846,
+    "title": "多摩祭ポスター",
+    "content": "<!-- wp:paragraph -->\n<p>今度の週末(10月18-19日）は、本学の学園祭である<a rel=\"noreferrer noopener\" href=\"http://tamafes2014.web.fc2.com/index.html\" target=\"_blank\">「多摩祭」</a>が開催されます。多摩キャンパスには、10月18日(土)は<a href=\"http://ja.wikipedia.org/wiki/%E5%8D%97%E6%B5%B7%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%87%E3%82%A3%E3%83%BC%E3%82%BA\">南海キャンディーズ</a>さん、<a href=\"http://ja.wikipedia.org/wiki/%E3%83%90%E3%82%A4%E3%82%AF%E5%B7%9D%E5%B4%8E%E3%83%90%E3%82%A4%E3%82%AF\">バイク川崎バイク</a>さんのお笑いLIVEと、<a href=\"http://antena-official.jp/pc/index.html\">アンテナさん</a>のアーティストライブ。そして、10月19日(日)は<a href=\"http://ameblo.jp/kento-yamazaki/\">山﨑賢人</a>さんのトークショー（要チケット）と、<a href=\"http://www.soneyukie.com/index.html\">曽根由希江さん</a>のアーティストライブ等も予定されているそうです。是非、ご来訪下さい。 </p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":845,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"https://qa.fujimura.com/wp-content/uploads/2014/10/tamafes2014poster2.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2014/10/tamafes2014poster2.jpg\" alt=\"tamafes2014poster2\" class=\"wp-image-845\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>ちなみに、今年の多摩祭のポスターは当ゼミの清田純菜さんの作品が採用されました。今年のテーマは「Smile！！」です。このテーマには、大妻コタカの生誕130周年ということで、「コタカ先生のもとで学ぶ大妻生にこれから先もずっと笑顔が絶えませんように、また来場した人たちが笑顔で溢れますように…」という願いが込められており、このポスターではそのテーマを表現しています。<br></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>\n\n実は、本日、当サイトの背景画像をこの画像に変更しましたが、その画像も清田さんの作品です。どちらも素晴らしい作品ですね！ \n\n</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":842,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"https://qa.fujimura.com/wp-content/uploads/2014/10/zemihai2.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2014/10/zemihai2.jpg\" alt=\"zemihai2\" class=\"wp-image-842\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2014-10-13 13:25:14",
+    "modified": "2019-04-09 18:06:35",
+    "slug": "%e5%a4%9a%e6%91%a9%e7%a5%ad%e3%83%9d%e3%82%b9%e3%82%bf%e3%83%bc",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "art",
+      "web"
+    ],
+    "tags": [
+      "ポスター"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/846",
+    "featuredImageId": 845,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2014/10/tamafes2014poster2.jpg"
+  },
+  {
+    "id": 830,
+    "title": "【ゼミ発表の紹介】　CSS3の新機能",
+    "content": "社会情報学部では３年生からゼミに配属され、週１回ゼミの活動を行う時間があります。今年度の当ゼミの３年生は、Wordpress, Tumblr, Bootstrap, CSS3, jmpress, three.js, D3.jsなどのWeb技術やArduino, Raspberry PI, Processingなどの電子工作系の技術等を学びました。\nゼミのやり方は他の情報系のゼミと同様だと思いますが、各自が選んだテーマ（上記のようなWeb技術等）について実際に使ってみて、その経験を参加者の間でプレゼンするという形態で進めています。このような活動を通じてものづくりの楽しさを知っていただければと考えております。\nちなみに最近は、プレゼンテーションにはPowerPointは使わず、Google Slidesを利用する学生が増えています。Google Slideは複数人で共同で発表するときには特に便利ですね。それから、<a title=\"prezi\" href=\"http://prezi.com/\" target=\"_blank\" rel=\"noopener noreferrer\">Prezi</a>や<a title=\"jmpress\" href=\"http://jmpressjs.github.io/jmpress.js/#/home\" target=\"_blank\" rel=\"noopener noreferrer\">jmpress</a>などもよく使われるようになっています。\n<a href=\"http://web.fujimura.com/css3/\"><img class=\"alignright wp-image-831 size-medium\" src=\"https://qa.fujimura.com/wp-content/uploads/2014/09/CSS3Demo-300x169.png\" alt=\"CSS3Demo\" width=\"300\" height=\"169\" /></a>また、CSS3等のWeb技術の場合、CSS3のリファレンスサイトを制作してそれを使ってプレゼンする学生もいます。右はA. M.さんによる発表の資料で、たいへんよい資料でしたので、公開することにしました。<strong>画像をクリック</strong>するとそのCSS3の説明するページが開きます。CSS3の新機能のリストが表示され、各機能をクリックすると説明が表示されます。上下の矢印で項目を移動、さらに「<strong>- DEMO PAGE -</strong>」をクリックするとこの画像のような実際にCSS3で実行するデモが表示されます。\n特にCSS3のようなWeb技術を解説する場合、PowerPointのようなプレゼンテーションツールで淡々と機能を説明しても、聞いている人には伝わらないので、学生がどのようにプレゼンするか不安でしたが、このように実際にリファレンスサイトを作って紹介してくれたのは驚きました。今後のプレゼンでも是非、工夫して楽しい発表をしてくれることを期待しています。",
+    "excerpt": "",
+    "date": "2014-09-05 11:08:43",
+    "modified": "2019-04-09 18:08:08",
+    "slug": "%e3%82%bc%e3%83%9f%e7%99%ba%e8%a1%a8%e3%81%ae%e7%b4%b9%e4%bb%8b%e3%80%8ccss3%e3%81%ae%e6%96%b0%e6%a9%9f%e8%83%bd%e3%80%8d",
+    "status": "draft",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "JavaScript",
+      "programming",
+      "web"
+    ],
+    "tags": [
+      "CSS3",
+      "ゼミ",
+      "プレゼン"
+    ],
+    "link": "https://web.fujimura.com/?p=830"
+  },
+  {
+    "id": 800,
+    "title": "【卒業研究の紹介】　three.jsを使った情報可視化手法の提案",
+    "content": "以前の<a href=\"http://www.sis.otsuma.ac.jp/i-design/?p=886\" target=\"_blank\" rel=\"noopener noreferrer\">こちらの投稿</a>に続いて、昨年度の本ゼミの卒業研究を紹介します。\n今回、ご紹介するのは「情報可視化」に関する研究です。この研究は、消費者の属性と広告媒体（雑誌、TV、Web）との関係を分析し、特定の商品を宣伝しようとする場合に、広告媒体やターゲットユーザを選ぶというマーケティング活動を支援することを目標としています。\n今回、研究に用いた分析データは、企業の広告や販売促進などの「マーケティング活動」と、消費者が購入に至るまでのステップである「消費行動のプロセス」とを、同一のモニタで調査した<a href=\"http://www.is.nri.co.jp/contest/data.html\" target=\"_blank\" rel=\"noopener noreferrer\">シングルソースデータ（（出所）株式会社野村総合研究所 インサイトシグナル（2013年3～4月期）データ）</a>を使用しました。今回はこのデータセット含まれる、3,000人のモニタに対するWebアンケートやWebアクセスログ等によって取得した、テレビ視聴履歴、Web閲覧履歴、雑誌閲覧履歴と、職業と趣味などのデモグラフィック属性データ、そしてビールやジュース等の飲み物の購入頻度データを分析しました。\nこの研究では、このデータを、ノードとエッジに属性を持つ「属性付きグラフ」としてモデル化し、その属性付きグラフを3Dモデルとして可視化するという手法を提案しています。本システムの実装には、three.jsと呼ぶ3Dモデルを表示するためのJavaScriptライブラリを使い、ユーザの操作により可視化対象の属性を自由に選べるようにしました。選択された属性は瞬時に可視化に反映させることで、選択した属性による関連性の相違点を把握できるようにしています。我々はこのアプローチを「レスポンシブ可視化」と呼んでいます。\nそれでは実際の分析結果をご覧下さい。ただし、本エントリでご紹介するのは、その分析結果すべてではなく、分かりやすい結果が出た、(1)雑誌と趣味、(2)雑誌と飲料品、(3)雑誌と職業との関係のみです。WebサイトやTV番組の分析結果は省略します。\nそれぞれ、以下の画像をクリックすると別のタブで可視化結果が表示されます。ご覧いただく場合には、必ずHTML5対応のChrome,Firefox,IE11以降等のブラウザでご覧下さい（スマホはWebGLに対応していないのでご覧いただけません）。マウスの左ボタンのドラッグ、右ボタンのドラッグ、マウスホイールにより、自由自在に視点を移動させることができ、これにより、グラフの全体の中から特徴的なクラスタの発見を可能にしています。\n(1)雑誌とその読者の趣味（以下の画像をクリックすると可視化結果が別タブで表示されます）\n<a href=\"http://web.fujimura.com/5ae572eda3ebe42a/magazineLOIS/index_hoby.html\" target=\"_blank\" rel=\"noopener noreferrer\"><img class=\"alignnone wp-image-803 size-medium\" src=\"https://qa.fujimura.com/wp-content/uploads/2014/06/5df46bed7ed313a7bc7b8a38da0fcf57-300x202.png\" alt=\"購読雑誌と趣味\" width=\"300\" height=\"195\" /></a>\n(2)雑誌とその読者の飲料品（以下の画像をクリックすると可視化結果が別タブで表示されます）\n<a href=\"http://web.fujimura.com/5ae572eda3ebe42a/magazineLOIS/index_drink.html\" target=\"_blank\" rel=\"noopener noreferrer\"><img class=\"alignnone wp-image-801 size-medium\" src=\"https://qa.fujimura.com/wp-content/uploads/2014/06/c1f336995a18fb4a095bc75b9f7b353e-300x205.png\" alt=\"購読雑誌とドリンク\" width=\"300\" height=\"205\" /></a>\n(3)雑誌とその読者の職業（以下の画像をクリックすると可視化結果が別タブで表示されます）\n<a href=\"http://web.fujimura.com/5ae572eda3ebe42a/magazineLOIS/\" target=\"_blank\" rel=\"noopener noreferrer\"><img class=\"alignnone wp-image-802 size-medium\" src=\"https://qa.fujimura.com/wp-content/uploads/2014/06/649c0d854d4c57edc9f9b726d37efa0e-300x195.png\" alt=\"購読雑誌と趣味\" width=\"300\" height=\"202\" /></a>\n3D空間の床面には、雑誌間の購読ベクトルの類似度に基づくグラフが配置され、購読者が類似する雑誌が近くに配置されています（x座標とy座標の値には意味はありません）。ノードは雑誌を表し、エッジは雑誌と雑誌との読者の類似度を表します。ノードとエッジの色は、クラスタリング分析によって自動的に付与されたクラスタを表し、類似したクラスタに含まれる雑誌には同じ色が着色されています。ノードには3D棒グラフが表示されていますが、この棒グラフは、ユーザによって選択されたノード属性の割合を示すものであり、画面の下部に表示されている職業や飲み物のボタンをクリックすることで、インタラクティブに表示する棒グラフの種類が変えることができます。さらに、画面左下には、カイ二乗検定を適用するかどうかを指定するチェックボックスが備えられており、これにより、統計的に有意な属性をもつノードのみを棒グラフで表示することができます。例えば、「学生」という職業属性が選択されていた場合、学生が視聴する割合が他の職業よりも有意に高い場合のみ、棒グラフを表示します。\n今回は分析手法としては、単純なクロス集計とクラスタリングしか使っていませんが、クラスタリングとクロス集計の結果を同時に把握できるインタフェースにより、様々な発見ができることが、ご理解いただけたと思います。当ゼミでは今後も新しい情報可視化方法を提案していく予定です。\n尚、この成果は今年３月に沖縄で開催された<a title=\"LOIS\" href=\"http://www.ieice.org/ken/program/index.php?tgs_regid=58139485ce5ecf9793f6d662c4cd00913a561fc424070415b668d783393e317c&amp;tgid=IEICE-LOIS&amp;lang=jpn\">電子情報通信学会のLOIS研究会</a>で発表しておりますので、詳しい内容は、その研究会の発表原稿をご覧いただければ幸いです。研究会で発表したプレゼンテーション資料は<a href=\"http://qa.fujimura.com/responsiveVis.html#/home\" target=\"_blank\" rel=\"noopener noreferrer\">こちら</a>に公開しております。\nP.S. マーケティング分析コンテストを開催し、このような素晴しいデータを提供していた野村総合研究所に心より感謝致します。",
+    "excerpt": "",
+    "date": "2014-06-07 20:24:02",
+    "modified": "2019-04-09 18:03:00",
+    "slug": "%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e3%81%ae%e7%b4%b9%e4%bb%8b%e3%80%80%e3%83%9e%e3%83%bc%e3%82%b1%e3%83%86%e3%82%a3%e3%83%b3%e3%82%b0%e5%90%91%e3%81%91%e3%81%ae%e6%83%85%e5%a0%b1%e5%8f%af%e8%a6%96",
+    "status": "draft",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "data mining",
+      "JavaScript",
+      "programming",
+      "visualization"
+    ],
+    "tags": [
+      "three.js",
+      "マーケティング",
+      "情報可視化"
+    ],
+    "link": "https://web.fujimura.com/?p=800"
+  },
+  {
+    "id": 770,
+    "title": "グリッドスタイルのテーマに変更",
+    "content": "本サイトをグリッドスタイルのテーマに変更しました。グリッドスタイルでは、トップページには、記事全文ではなく記事の抜粋のみを掲載することになります。つまり、本文を適当な位置で切って、\"Read more ...\"のように表示する必要があります。しかし、日本語のようにutf-8の文字コードの場合には、the_excerpt()という抜粋を切り出す関数が働かないため、本家のWordPressではうまく表示できません。そこで、この問題を修正してくれる<a title=\"wordpress 日本語パッチ\" href=\"http://eastcoder.com/code/wp-multibyte-patch/\">WordPressの日本語パッチ</a>を導入する必要がありました。さらに、それを導入するためには、WordPressを最新版の3.9にする必要がありました。ということで、いっそのこと、OSも最新版にした方が良さそうだったので、結局、仮想マシンの生成から全てやり直しました。しかし、それには、DBの設定、既存ユーザのファイルのコピー等、沢山の作業が必要でした。",
+    "excerpt": "",
+    "date": "2014-05-18 19:00:00",
+    "modified": "2014-05-18 19:00:00",
+    "slug": "%e3%82%b0%e3%83%aa%e3%83%83%e3%83%89%e3%82%b9%e3%82%bf%e3%82%a4%e3%83%ab%e3%81%ae%e3%83%86%e3%83%bc%e3%83%9e%e3%81%ab%e5%a4%89%e6%9b%b4",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "wordpress"
+    ],
+    "tags": [
+      "grid",
+      "theme"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/770",
+    "featuredImageId": 777,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2014/05/fa469529c87d98f841daf78b730ed3d3.png"
+  },
+  {
+    "id": 650,
+    "title": "【卒業研究の紹介】　メディアアートの制作",
+    "content": "<a title=\"卒研の紹介\" href=\"http://www.sis.otsuma.ac.jp/i-design/?p=886\"><img class=\"alignright size-medium wp-image-654\" title=\"generative_music\" src=\"http://web.fujimura.com/blog/wp-content/uploads/2014/05/watanabe01-300x177.jpg\" alt=\"\" width=\"300\" height=\"177\"></a>藤村ゼミも今年の３月末、16名の第１期生が卒業しました。本日、メディアアート分野の以下の２つの卒業研究について<a title=\"卒研の紹介\" href=\"http://www.sis.otsuma.ac.jp/i-design/?p=886\">こちらの専攻のサイト</a>に紹介の記事を書きましたので、読んでいただければ幸いです。\n<ul>\n \t<li>三軸加速度センサによるジェネラティブミュージックの制作</li>\n \t<li>Processingによる遠隔通信モーションキャプチャ技術の開発</li>\n</ul>",
+    "excerpt": "",
+    "date": "2014-05-05 18:02:59",
+    "modified": "2019-04-09 18:14:07",
+    "slug": "%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e3%81%ae%e7%b4%b9%e4%bb%8b%e3%80%80%e3%83%a1%e3%83%87%e3%82%a3%e3%82%a2%e3%82%a2%e3%83%bc%e3%83%88%e3%81%ae%e5%88%b6%e4%bd%9c",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "media art",
+      "programming"
+    ],
+    "tags": [
+      "processing",
+      "卒業研究"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/650",
+    "featuredImageId": 1116,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2019/04/media-art01.png"
+  },
+  {
+    "id": 632,
+    "title": "ゼミ合宿で「光ファイバー手芸」",
+    "content": "<!-- wp:image {\"id\":633,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/11/fujimura_travle02.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/11/fujimura_travle02.jpg\" alt=\"\" class=\"wp-image-633\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>藤村ゼミも今年の夏、はじめてのゼミ合宿を行いました。ゼミ合宿は、一泊ながら、光ファイバーとLEDによる「テクノ手芸」や、ラフティング、カヌー、BBQなど盛りだくさんでした。詳しくは、<a title=\"ゼミ合宿\" href=\"http://www.sis.otsuma.ac.jp/i-design/?p=669\" target=\"_blank\" rel=\"noopener noreferrer\">こちらの専攻のサイト</a>の方に投稿しましたので、ご覧下さい。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-11-27 01:32:38",
+    "modified": "2019-04-10 18:12:27",
+    "slug": "%e3%82%bc%e3%83%9f%e5%90%88%e5%ae%bf%e3%81%a7%e3%80%8c%e5%85%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%90%e3%83%bc%e6%89%8b%e8%8a%b8%e3%80%8d",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "media art"
+    ],
+    "tags": [
+      "ゼミ合宿",
+      "テクノ手芸",
+      "マクラメ",
+      "光ファイバー"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/632",
+    "featuredImageId": 1121,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2019/04/fujimura_travle02.jpg"
+  },
+  {
+    "id": 630,
+    "title": "卒業研究の表題が決まりました",
+    "content": "<!-- wp:paragraph -->\n<p><span style=\"line-height: 1.7;\">先日、本年度の４年生が取り組んでいる卒研のタイトルが決まりました。藤村ゼミが本学に来て、初めての卒業生となりますので、すべてが０からのスタートでした。うまくいかないことも少なくなかったのですが、みんなよく頑張りました。４年生のみなさま、努力しただけ、力がつくと思いますので、最後まで、頑張りましょう。</span></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>【データマイニングと可視化】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li><span style=\"line-height: 1.7;\">three.jsによるネットワークデータのインタラクティブな可視化</span></li><li><span style=\"line-height: 1.7;\">Webサイトとその来訪者のデモグラフィック属性の関係抽出</span></li><li><span style=\"line-height: 1.7;\">テレビ番組とその閲覧者のデモグラフィック属性の関係抽出</span></li><li><span style=\"line-height: 1.7;\">雑誌とその読者のデモグラフィック属性の関係抽出</span></li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>【マーケティング】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li><span style=\"line-height: 1.7;\">リスティング広告の実践とその効果の検証</span></li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>【メディアアート・テクノ手芸】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li><span style=\"line-height: 1.7;\">三軸加速度センサによるジェネラティブミュージックの制作</span></li><li><span style=\"line-height: 1.7;\">Processingによる遠隔通信モーションキャプチャ技術の開発</span></li><li><span style=\"line-height: 1.7;\">Kinectを使った顧客の頭の動きに反応する広告メディアの制作</span></li><li><span style=\"line-height: 1.7;\">Kinectを使った顧客の動きに反応する情報提示機能の実現</span></li><li><span style=\"line-height: 1.7;\">AR手袋を使用したインタラクティブアートの制作</span></li><li><span style=\"line-height: 1.7;\">Blenderによるキャラクター動作の3Dモデリング</span></li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>【Webプログラミング】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li><span style=\"line-height: 1.7;\">過去の食事履歴からメニューを推薦するサイトの構築</span></li><li><span style=\"line-height: 1.7;\">データベースとネットワーク可視化のツールの連携</span></li><li><span style=\"line-height: 1.7;\">アンケート結果のリアルタイムテキストマイニングツールの開発</span></li><li><span style=\"line-height: 1.7;\">MongoDBとNode.jsによる日記アプリの開発</span></li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>【教育・ゲーム】</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul><li>学習意欲を高めるための要素を備えたゲームの制作</li></ul>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>完成したら、今後、少しずつ本サイトでも紹介したいと考えております。ゼミのみなさまコンテンツの提供、よろしくお願いします。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-11-26 01:01:04",
+    "modified": "2019-04-10 18:33:33",
+    "slug": "%e5%8d%92%e6%a5%ad%e7%a0%94%e7%a9%b6%e3%81%ae%e8%a1%a8%e9%a1%8c%e3%81%8c%e6%b1%ba%e3%81%be%e3%82%8a%e3%81%be%e3%81%97%e3%81%9f",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "卒業研究"
+    ],
+    "tags": [
+      "ゼミ",
+      "卒研"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/630",
+    "featuredImageId": 803,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2014/06/649c0d854d4c57edc9f9b726d37efa0e.png"
+  },
+  {
+    "id": 619,
+    "title": "学生のタレント好き嫌いを表現したインフォグラフィック",
+    "content": "<!-- wp:image {\"id\":620,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/talent/\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/11/talent_threejs.png\" alt=\"\" class=\"wp-image-620\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>学部の2年～3年向けの「応用統計論及び演習」という授業では、アンケート等のデータを分析する様々なデータマイニングの方法論について学んでいます。本年度は、その講義の受講者のタレントに対する好感度を分析しましたので、その結果の一部を紹介します。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>実施したアンケートは2段階からなり、まず最初のアンケートでは、分析対象のタレント（スポーツ選手等の有名人を含む）の候補を1人5名程度挙げてもらいました。その結果、分析したいという希望が多かった83人のタレントを選びました。<span style=\"line-height: 1.7;\">そして、2回目のアンケートでは、その83名のタレントに対して、受講者36人が、好きか嫌いかを5段階で評価してもらいました。</span></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>その結果を可視化したのが、右の３次元グラフです。右の画像をクリックすると、Webブラウザで３次元で可視化されたグラフが表示されます。<strong>Webブラウザは必ずPC版のChromeかFirefoxをお使い下さい。HTML5のWebGLと呼ぶ機能を使っているため、スマホは未対応です。また、IEは最新のHTML5に対応していないのでご覧いただけません。</strong></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>操作方法は、マウスのドラッグで回転。スクロールホイールでズームイン・アウト。右ボタンのドラッグで並行移動です。<br>それで、これは何を表現しているかと申しますと、ノードはタレント、エッジはそのタレントへの評価の類似度、棒グラフの高さはそのタレントへの平均評価を表します。さらにノードと棒グラフの色はクラスタリング（似た特徴をもつノード同士を分類すること）の結果を表しますので、近い評価を受けたタレント同士が同じ色に自動的に着色されています。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>こうして眺めてみると、僅か36人のアンケート結果であっても、類似したタレント同士がきれいに分類、抽出されていることがよく分かります。<span style=\"line-height: 1.7;\">このようなデータの可視化に関心のある方は、昨年度のエントリ<a title=\"超「スモールデータ」\" rel=\"noopener noreferrer\" href=\"http://web.fujimura.com/blog/archives/272\" target=\"_blank\">「超スモールデータ」</a>もご覧下さい。昨年のバージョンとは異なり、今年は、three.jsと呼ぶJavaScriptのライブラリを使って3次元空間上に表現できるようにしました。</span></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>データの特徴を人間が理解しやすく表現したものを「インフォグラフィック」と呼びますが、藤村ゼミでは、このようなインタラクティブに操作可能なインフォグラフィック作品の制作を一つのテーマにしています。ちなみに、この表現方法も今年の学生が卒研として取り組んできた成果の一つです。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-11-24 13:07:54",
+    "modified": "2019-04-10 18:35:33",
+    "slug": "%e5%ad%a6%e7%94%9f%e3%81%ae%e3%82%bf%e3%83%ac%e3%83%b3%e3%83%88%e5%a5%bd%e3%81%8d%e5%ab%8c%e3%81%84%e3%82%92%e8%a1%a8%e7%8f%be%e3%81%97%e3%81%9f%e3%82%a4%e3%83%b3%e3%83%95%e3%82%a9%e3%82%b0%e3%83%a9",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "data mining",
+      "JavaScript",
+      "media art",
+      "programming",
+      "visualization"
+    ],
+    "tags": [
+      "2.X次元",
+      "JavaScript",
+      "three.js",
+      "インフォグラフィック",
+      "ゼミ"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/619",
+    "featuredImageId": 621,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/11/talent_threejs1.png"
+  },
+  {
+    "id": 609,
+    "title": "WebSocketを使った参加型プレゼンテーション",
+    "content": "<!-- wp:paragraph -->\n<p>昨日、東京ビックサイトで開催された高校生向けのイベント「<a href=\"http://web.fujimura.com/blog/archives/580\">夢ナビライブ</a>」で講演したスライド（抜粋）をサーバにアップロード致しました。今回のプレゼンテーションでは、WebSocket等のHTML5の機能を活用して、参加者が自分のスマホを使って、私のプレゼンテーションに書き込みをしたり、投票結果をリアルタイムにグラフ化する試みを行いました。参加した高校生のみなさんも楽しんでいただけたようです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":610,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://qa.fujimura.com/websocket.html\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/07/yumi.png\" alt=\"\" class=\"wp-image-610\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>本資料をご覧になるには、chromeやfirefox等のHTML5対応ブラウザをPCと、それとは別にスマートフォンをご用意下さい。プレゼンテーションにスマホから書き込みができます。実際に試してみるには、上記の画像をクリックして下さい。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":611,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://qa.fujimura.com/enchant.html\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/07/enchant.png\" alt=\"\" class=\"wp-image-611\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>ゲームモードでは、enchant.js+WebSocketによりプレゼンテーションの聴衆がコメントを書き込むことで参加できるシンプルなゲームも作成しました。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-07-15 00:13:03",
+    "modified": "2019-04-10 18:44:59",
+    "slug": "websocket%e3%82%92%e4%bd%bf%e3%81%a3%e3%81%9f%e5%8f%82%e5%8a%a0%e5%9e%8b%e3%83%97%e3%83%ac%e3%82%bc%e3%83%b3%e3%83%86%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "JavaScript",
+      "visualization",
+      "web"
+    ],
+    "tags": [
+      "HTML5",
+      "WebSocket",
+      "夢ナビ"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/609",
+    "featuredImageId": 611,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/07/enchant.png"
+  },
+  {
+    "id": 580,
+    "title": "夢ナビライブで講演します",
+    "content": "<!-- wp:image {\"id\":584,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://yumenavi.info/\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/06/yumenavi.gif\" alt=\"\" class=\"wp-image-584\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:image {\"id\":583,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/06/yumenavi01s.png\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/06/yumenavi01s.png\" alt=\"\" class=\"wp-image-583\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>高校生向けの「大学進学のための学問発見イベント」<a title=\"夢ナビライブ\" href=\"http://yumenavi.info/live/index_pc.htm\">夢ナビライブで7月13日（土曜）</a>に私（藤村）が東京ビッグサイトで講演します。このイベントは、高校生が進学先の大学を選ぶ参考にしてもらうため、全国の大学の先生が模擬授業を行うというもので、この日の東京会場の講義ライブは全部で305講義もあるそうです！私の講義は７限目（16:30～17:00）の予定です。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>講義内容は、<a href=\"http://web.fujimura.com/blog/archives/260\">WebSocket</a>等の最新Web技術の紹介です。この講義では、ライブ会場の参加者が持っているスマホを活用して、私のプレゼンにリアルタイムで参加してもらうというチャレンジングな（？）試みを実施する予定です。会場の電波状況次第では上手くいかないかもしれません。どうなることでしょう？終わったら、ここでまた紹介しますね。<br></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>【2013.7.15追記】夢ナビライブは無事終了しました。当日はdocomo LTEでデザリングで接続しましたが、東京ビッグサイトの東ホールでは30Mbps位の速度が出ました。講義で使用したスライドを抜粋、アップデイトしたものをWebサイトにアップしました。実際の参加型プレゼンテーションを体験することができます。詳細に関しては<a title=\"夢ナビライブ\" href=\"http://web.fujimura.com/blog/archives/609\">こちらのエントリ</a>をご覧下さい。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-06-29 14:40:05",
+    "modified": "2019-04-10 18:42:59",
+    "slug": "%e5%a4%a2%e3%83%8a%e3%83%93%e3%83%a9%e3%82%a4%e3%83%96%e3%81%a7%e8%ac%9b%e6%bc%94%e3%81%97%e3%81%be%e3%81%99",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "event",
+      "web"
+    ],
+    "tags": [
+      "WebSocket",
+      "プレゼンテーション",
+      "夢ナビ"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/580",
+    "featuredImageId": 583,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/06/yumenavi01s.png"
+  },
+  {
+    "id": 356,
+    "title": "卒展に行こう（２）",
+    "content": "<!-- wp:paragraph -->\n<p>先週、<a href=\"http://web.fujimura.com/blog/?p=289\">卒展を行こう</a>という記事を書きましたが、今週も多摩美術大学情報デザイン学科メディア芸術コースの卒展<a href=\"http://www.idd.tamabi.ac.jp/art/exhibit/gw12/\">「MEDIA FREE」</a>に行って来ましたので、続きです。私はインタラクティブなインスタレーションに関心があるのですが、その観点で３つの作品に興味を持ったのでご紹介。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":354,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/media_free01.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/media_free01.jpg\" alt=\"\" class=\"wp-image-354\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>まずはこの「song of raindrops」という作品。この作品は傘の裏側に付いているセンサで雨の振動をアナログ信号としてarduinoで受信し、data mappingにより音楽情報に置き換え、ブルートゥースでiphoneに送り、「雨のライブ演奏」を鑑賞できるようにするというもの。<a href=\"http://makezine.jp/blog/2013/03/song_of_raindrop.html\">生成された音楽はネット上</a>にありますので聞くこともできます。作者のキム・チョンウンさんに直接話を聞くことができました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":358,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/media_free041.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/media_free041.jpg\" alt=\"\" class=\"wp-image-358\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>これは「GroWorD」という作品。この作品は手書きの文字と活字のペアを入力としてアルゴリズムにより生命体のような文字を生成する。この作品の面白いところは顕微鏡というギミックを使ってインタラクティブなインスタレーションとしたところ。顕微鏡は、実際に小さいものを拡大しているのではなく、レンズの焦点を合わせるダイヤルを回転させるとピントがボケたり、レンズを交換すると異なる画像表現に変化させるためのタンジブルなインタフェースとして利用しています。実装にはやはりarduinoを使って顕微鏡のダイヤルの回転をアナログ信号として取り込んで、openFrameworksで処理しているとのこと。こちらも作者の高橋昂司さんに直接伺うことができました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":359,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/media_free031.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/media_free031.jpg\" alt=\"\" class=\"wp-image-359\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>これは「From the Voice」という作品。10を超える言語の音声を多数のPCで再生し、聞いたことのない多国籍な雑踏を作り出すというものです。ちょうどタイミングが良く、作者の丸山透さんのライブを見ることができました。手の動きに反応して雑踏をリアルタイムに変化させており、こちらも実装にはセンサとopenFrameworksを使っているそうです。<br>他にも楽しい作品が沢山ありました。「MEDIA FREE」は明日3/17までです。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-03-16 18:28:03",
+    "modified": "2019-04-10 18:49:06",
+    "slug": "%e5%8d%92%e5%b1%95%e3%81%ab%e8%a1%8c%e3%81%93%e3%81%86%ef%bc%88%ef%bc%92%ef%bc%89",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "media art"
+    ],
+    "tags": [
+      "Arduino",
+      "インスタレーション",
+      "卒展",
+      "多摩美術大学情報デザイン学科"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/356",
+    "featuredImageId": 353,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/03/media_free02.jpg"
+  },
+  {
+    "id": 336,
+    "title": "テクノ手芸をはじめます",
+    "content": "<!-- wp:image {\"id\":337,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/arduino_processing.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/arduino_processing.jpg\" alt=\"\" class=\"wp-image-337\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:image {\"id\":338,\"align\":\"center\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/arduino_processing.png\" alt=\"\" class=\"wp-image-338\"/></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>キーボード、ディスプレイ、マウス等のPCの入出力デバイスだけでは、インタラクティブな<a href=\"http://ja.wikipedia.org/wiki/%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3\">インスタレーション</a>の制作は難しいので、光センサーやLED等の様々な入出力デバイスと連携させることができるArduinoを購入してみました。<br>とりあえず納品検査を兼ねて、光センサーの強さがある一定以上になると赤いLED、一定以下になると緑のLEDを点灯するとともに、PC画面上に光の強さが棒グラフで表示されるプログラムをProcessingで書きました。30年ぶりに電子回路に触れて楽しい一日でした。参考文献<a href=\"http://kougaku-navi.net/AR-ProgrammingBook/\">ARプログラミング-Processingでつくる拡張現実感のレシピ</a>のお陰で簡単でしたが、Processingの最新版2.0b8だとArduinoとの連携ライブラリがエラーが発生したので、Processing 1.5で動かしました。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":344,\"align\":\"center\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://makezine.jp/blog/2013/02/barbies-blinky-dress.html\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/barbies-blinky-dress2.jpg\" alt=\"\" class=\"wp-image-344\"/></a><figcaption>Make: Japanより引用</figcaption></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>さて、これから何をするかは、ゼミ生のアイデア次第ですが、例えば、光センサから取得されるアナログデータの値を使って<a href=\"http://web.fujimura.com/blog/?p=203\">ジェネラティブ・アート</a>の形状をインタラクティブに変化させるというのは鉄板ネタ。それから、オリジナルの光る人形や洋服、カバン等の<a href=\"http://techno-shugei.com/\">テクノ手芸</a>に活用するとか。写真は<a href=\"http://mattelbrandsmedia.com/product.php?category=0&amp;product=108\">「ディジタルドレス」を着たバービー人形($49.99)</a>だそう。<br>今年の多摩祭で何か作品を出展しませんか？＞ゼミメンバ各位殿</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-03-14 19:34:09",
+    "modified": "2019-04-10 18:51:03",
+    "slug": "%e3%83%86%e3%82%af%e3%83%8e%e6%89%8b%e8%8a%b8%e3%82%92%e3%81%af%e3%81%98%e3%82%81%e3%81%be%e3%81%99",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "media art",
+      "programming"
+    ],
+    "tags": [
+      "Arduino",
+      "barbie",
+      "processing",
+      "インスタレーション",
+      "光センサ"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/336",
+    "featuredImageId": 337,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/03/arduino_processing.jpg"
+  },
+  {
+    "id": 311,
+    "title": "LOIS研究会",
+    "content": "<!-- wp:paragraph -->\n<p>先週3月7日～２日間、<a href=\"http://www.ieice.org/iss/ois/jpn/index.html\">電子情報通信学会LOIS研究会</a>に参加してきました。電子情報通信学会は、基礎・境界、通信、エレクトロニクス、情報・システム、ヒューマンコミュニケーション等の幅広い分野をカバーする会員数34000人の大きな学会で、その中でLOIS研究会は、オフィスシステムの基本となるインフラなどの要素技術からアプリケーションなどの応用技術やシステム化技術まで幅広く扱っている研究会です。LOISはLife intelligence and Office information systemの略で、近年、ネット上に蓄積されている個人の生活の履歴（ライフログ）等や企業で蓄積されている大量のデータの活用法等に関して活発な議論、情報交換を行なっています。本ゼミが対象とするWebプログラミング、データマイニング、情報可視化はいずれも本研究会のカバー範囲になっております。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":317,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/lois2013_01.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/lois2013_01.jpg\" alt=\"\" class=\"wp-image-317\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>LOIS研究会は年6回開催されていますが、３月に開催される研究会は、時期的に卒業論文や修士論文の研究の発表に適していることから、特に発表件数が多くなっております。また、2008年度から沖縄県で開催されるようになってから様々な組織の研究者が集まるようになり、発表内容も優れたものが多く発表されるようになりました。ちなみにLOIS研究会で３月での投稿論文数の推移は、次のようになっております。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":324,\"align\":\"center\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/LOIS_2005_2012.png\" alt=\"\" class=\"wp-image-324\"/></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>今回の発表は宮古島開催で、企業からは7件、大学からは25件の発表があり、全体で38件の発表が行われました。最近は女性研究者の発表が増え、今年は津田塾大学から6件の発表があるなど合計10件の発表がありました。概要は<a href=\"http://www.ieice.org/ken/program/index.php?tgs_regid=de90a88790bb526a1978d00b601f33d1c843d42e9c005f8540b5f9f7a438d288&amp;tgid=IEICE-LOIS&amp;lang=\">こちらのプログラム</a>をご覧下さい。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":320} -->\n<figure class=\"wp-block-image\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/miyako_sunayama_beach_s.jpg\" alt=\"\" class=\"wp-image-320\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>来年度2014年3月の開催は石垣島を予定しているそうです。是非、卒業研究で優れた成果を上げて石垣島で発表してはいかがでしょうか。写真は今回の会場から近い砂山ビーチ＠宮古島です。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-03-11 19:07:46",
+    "modified": "2019-04-10 19:12:26",
+    "slug": "lois%e7%a0%94%e7%a9%b6%e4%bc%9a",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "data mining"
+    ],
+    "tags": [
+      "LOIS",
+      "研究会",
+      "電子情報通信学会"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/311",
+    "featuredImageId": 320,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/03/miyako_sunayama_beach_s.jpg"
+  },
+  {
+    "id": 289,
+    "title": "卒展に行こう！",
+    "content": "<!-- wp:paragraph -->\n<p>ゼミの卒業研究で自分が何をしたいのか、具体的なイメージが沸かないという人も少なくないと思います。そこで、春休みは卒展のシーズンですので、卒展に出かけて多くの作品に触れるように努力しましょう。残念ながら今年度の卒展の多くは既に終わってしまいましたが、Web上にはいくつかの卒展の紹介がありますのでチェックしてみて下さい。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":300,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/chiba_design02.png\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/chiba_design02.png\" alt=\"\" class=\"wp-image-300\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>私は、情報デザイン分野に関連する２つの卒展に行きました。一つは千葉大学工学部デザイン学科の「意匠展」と、もう一つは多摩美術大学情報デザイン学科の「つながりのかさなり」です。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":299,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/chiba_design01.png\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/chiba_design01.png\" alt=\"\" class=\"wp-image-299\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>千葉大学工学部デザイン学科の「意匠展」は3月1日から三日間、秋葉原の3331 Arts Chiyodaで開催されていました。会場風景です。さすがデザイン学科で展示会場は美しいですね。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>情報可視化の作品もありました。これはTwitterで配信しているトレンド語をうずまき上の３次元空間に配置して、ジョイスティックでいろいろな角度から眺められるようにした作品で、現地ではプロジェクターで壁に投影してデモを行なっていました。うずまき上にトレンド語が配置され上位の周辺部に新語が発生し、次第に中心部に沈んでいきますが、再び話題になると上に浮上するそうです。学部生とは思えない素晴らしい作品でした。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":301,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/chiba_design03.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/chiba_design03.jpg\" alt=\"\" class=\"wp-image-301\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>多摩美術大学情報デザイン学科の「つながりのかさなり」は3月8日から三日間、浅草橋HULIC HALLで開催されていました。会場風景です。これまた美しい展示会場です。作品の概要は<a href=\"http://www.idd.tamabi.ac.jp/design/exhibit/gw12/\">ネット上</a>でも見ることができます。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>会場で一際目立っていたのは、form giving pianoという作品です。この作品はピアノの88鍵盤分の座標をこれまたうずまき状（螺旋状）に配置し、鍵盤をたたくとその位置に図形が発生し、消えていくインタラクティブな作品です。当日はライブパフォーマンスが実施され、多くの聴衆を魅了していました。この作品はネット上にもありましたので、まずはご覧下さい：</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":297,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/tamabi0310_01.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/tamabi0310_01.jpg\" alt=\"\" class=\"wp-image-297\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:core-embed/vimeo {\"url\":\"http://vimeo.com/60950276\",\"type\":\"video\",\"providerNameSlug\":\"vimeo\",\"className\":\"wp-embed-aspect-18-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed-vimeo wp-block-embed is-type-video is-provider-vimeo wp-embed-aspect-18-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttp://vimeo.com/60950276\n</div></figure>\n<!-- /wp:core-embed/vimeo -->\n\n<!-- wp:paragraph -->\n<p><br><a href=\"http://www2.tamabi.ac.jp/cgi-bin/pro/gw/index.php?id=1\">多摩美術大学の美術学部全体の卒展</a>は3月20日から四日間、八王子キャンパスで開催されます。今回、ご紹介した情報デザイン学科の作品も展示されているそうですのでまだ間に合います。行ける人は行ってみましょう。きっとやりたいことがインスパイアされる作品に出会えると思います。<br>追加：<a href=\"http://www.idd.tamabi.ac.jp/art/exhibit/gw12/\">MEDIA FREE 多摩美術大学情報デザイン学科メディア芸術コース卒業制作展</a>が3月15日から三日間、横浜赤レンガ倉庫1号館で、開催されるそうです。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-03-10 19:42:19",
+    "modified": "2019-04-10 19:16:47",
+    "slug": "289",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "media art",
+      "visualization"
+    ],
+    "tags": [
+      "ゼミ",
+      "千葉大学工学部デザイン学科",
+      "卒展",
+      "多摩美術大学情報デザイン学科"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/289",
+    "featuredImageId": 298,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/03/tamabi0310_02.jpg"
+  },
+  {
+    "id": 272,
+    "title": "超「スモールデータ」",
+    "content": "<!-- wp:image {\"id\":285,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/03/food_preference_network.png\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/03/food_preference_network.png\" alt=\"\" class=\"wp-image-285\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>早速ですが、先ず114の食品のネットワーク可視化結果をご覧下さい。この結果は、114の食品に対して5段階で好きか嫌いかを被験者に尋ねるWebアンケートにより収集したデータで作ったものです。<br>この可視化は、まず評価者を行、食品を列とする行列を作り、その列ベクトル同士がどれだけ近いかをコサイン類似度で計算して、お互いに類似度が高い食品同士をエッジで接続します。そしてGephiと呼ぶネットワーク可視化ツールでエッジで接続されているノード同士がお互いに近くなるように２次元平面上に配置したものです。これはマイニングの教科書にある古典的な方法で特に何の工夫もありません。それでも、似たような食品がお互いに近くにまとまっていることがわかります。お刺身類は右、野菜は下、洋食は左、麺類と天ぷらが上、という具合です。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>同様に、下の階層的クラスタリングの結果をご覧下さい。こちらはコサイン類似度ではなくユークリッド距離を使って階層的クラスタリングを適用したものです。これも似たような食品がうまくクラスタに分かれていることがわかります。特に面白いのは、いくらとタピオカは全く違う食品ですが、同じクラスタに属しています。これはおそらくプチプチという独特の食感が人の嗜好に強く影響したためではないかと想像できます。このいくらとタピオカの例は、データマイニングの教科書に出てくる「ビールとおむつが一緒に買われる」例と同じぐらい興味深い発見ではないでしょうか。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":276,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/food_hclust.png\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/02/food_hclust.png\" alt=\"\" class=\"wp-image-276\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>さてこのような、良い結果が得られるには、どれくらいのデータを集めたか気になると思います。実は私の「応用統計論及び演習」という講義の受講生、僅か52名に対してWebアンケートを実施して得られたデータなのです。私は前職の研究所では数千万から数億件のブログ記事やTweetをつかったマイニングの研究に携わっていましたので、このデータと比較するとデータサイズという面では実に6桁位違うデータです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>このようなスモールデータでありながら、マイニングがうまくいったことには秘密があります。それは本データは僅か52名のアンケート調査であってもデモグラフィック属性の均一性がという点で際立ったものであることです。52名の年齢がほぼ同一、全員女子学生、居住地は関東、さらに同じ大学でこの選択の授業を履修したという点まで含めると奇跡的な均一性です。さらに食品の嗜好を調査する場合には、時間帯も影響するかもしれませんが、アンケートを実施した時間帯も全員同じ昼食後の３限目です。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>この結果には、正直、私も驚きました。デモグラフィック属性の均一性、元データの良さがいかに分析結果に影響するかのよい例だと思います。もし、高齢者や男子が被験者に含まれた場合には、純粋な食品の嗜好以外の要因がノイズとなり、これほどの精度は出ないでしょう。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>一昨年前位からビッグデータと呼ぶ言葉がよく聞かれるようになりました。確かに、近年のクラウド・コンピューティングや分散処理技術の進歩はめざましく、今まで処理できない大量のデータが容易に処理できるようになったことは素晴らしいことです。一方で、統計数理研究所の丸山宏先生の名言で「ビッグデータ周辺の問題の多くはサンプリングとExcelで解ける」というのがあるそうですが、今回の結果は、まさにその一例になっているのではないでしょうか。普通、「サンプリング」というのは、ランダムサンプリングを意味しており、今回のように特定のデモグラフィック属性のユーザのみというのは逆の方向性のですが、一応、「サンプリング」の一種とは言えると思います。いずれにせよ、本当にビックデータの分析が必要なケースはどれほどあるのだろうかと改めて考えさせられる経験でした。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>ところで、この分析結果は意外と役に立ちそうです。特に若い男性にとっては。。。一つでも好きな食品が分かると他に何が好きかある程度予想できますので、彼女を食事に誘うケースなどに使えませんか？</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-02-24 19:32:17",
+    "modified": "2019-04-10 18:53:43",
+    "slug": "smalldata",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "data mining",
+      "visualization"
+    ],
+    "tags": [
+      "bigdata",
+      "data mining",
+      "foods",
+      "gephi",
+      "network",
+      "smalldata",
+      "visualization",
+      "応用統計論",
+      "講義"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/272",
+    "featuredImageId": 285,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/03/food_preference_network.png"
+  },
+  {
+    "id": 260,
+    "title": "WebSocketがもたらす「プロトコル爆発」",
+    "content": "<!-- wp:paragraph -->\n<p> インターネット上でデータが送れるのは、送り側と受け取り側でデータをどのようなフォーマットと手順で送信するかということが細かく決まっているからです。この取り決めをプロトコルと呼びます。インターネットのプロトコルは、IETFと呼ぶボランティア組織で決めています。IETFから出版される正式な文書はRFCと呼ばれ、これまでに6000を超えるのRFCが出版されています。ただし、この中には現在では古くなったRFCや、プロトコルそのものではなく、プロトコルを決めるルールや参考情報等があり、幅広く活用されているRFCはそれほど多くはありません。おそらく数百位だと思います。実は私も３本のRFCを出版していますが、残念ながらほとんど使われていません。<br>数多くのプロトコルのその中でも普段よく耳にするものの例として、ウェブで使われているHTTP、メールを受信するPOP3やIMAP4、ファイルを転送するFTPなどがあります。これらのプロトコルにはポート番号と呼ぶプロトコルを識別するIDが付与されており、ドメインネームやIPアドレスによって特定されたマシンに到達したデータパケットは、ウェブサーバやメールサーバ等のプロセスにデータが送られます。 </p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":257,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/WebSocket01.png\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/02/WebSocket01.png\" alt=\"\" class=\"wp-image-257\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>近年のWebの発展により、あらゆるアプリケーションがHTTPで動くようになってきました。最近では、ファイル転送にはFTPよりもHTTPを使うケースが増えましたし、メールについてもWebメールの普及でPOP3も使う機会は減っています。私も１年前からメールソフト（ThunderbirdやOutlook等）は一切使っていません。このように、なんでもHTTPで送受信するようになると逆にHTTPの問題点が目立つようになってきました。それは、HTTPは静的なウェブページをサーバからブラウザに送ることを目的に設計されたという歴史的背景から、ブラウザとサーバの間のコネクションが一回毎に途切れてしまうことです。昨今のWebアプリでは、Ajax通信が多用されますので、毎回のコネクションの接続があると大きなオーバーヘッドとなります。また、接続する度にコンテンツのタイプ、ブラウザの種類、リファラ等の多くの情報送られています。つまり、小さいデータを頻繁にやりとりする場合には無駄が大きすぎるのです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>そこで、このような細かい粒度のデータを頻繁にやりとりするための効率的なプロトコルを導入が検討されてきました。しかし、一般にプロトコルはOSレベルのソフトウェアであり、インストールが必要でした。また、OSにはじめからインストールされていれば普及は早いですが、それにはその社会的必要性が広く認知されなければなりません。さらに、多くの組織ではセキュリティ確保の為、内部から外に対してHTTP、HTTPS、SSHのポート番号80番、443番、22番位しかアクセスできないように設定されていますので、新しいプロトコルを導入することはきわめて敷居が高かったのです。ところがこれらの問題を一気に解決する技術が生まれました。それがWebSocketです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>WebSocketは、効率的な情報をやりとりする低位のデータ通信を、WebブラウザのJavaScriptから利用可能にするものです。これにより、これまでOSレベルにあったプロトコルを司るプログラムが何とブラウザ上のJavaScriptで書けるようになるのです。そして、もちろんJavaScriptのプログラムはHTTPで簡単にブラウザに配布し実行できます。つまり、新しいプロトコルを導入する敷居が全くなくなったわけです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":258,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/WebSocket02.png\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/02/WebSocket02.png\" alt=\"\" class=\"wp-image-258\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>実は、WebSocket自身も新しいプロトコルなのですが、インストールはWebブラウザのインストールによってなされています。そして、この新しいプロトコルのポート番号はなんとHTTPと同じ80番。なぜ、HTTPと別のプロトコルなのに同じポート番号を使うことが許されるのかと言いますと、HTTPの仕様が記載されているRFC2616には、将来のバージョンアップに備えて、HTTP 1.1 Upgradeという機能が記載されており、その機能を使って、最初にクライアントからサーバに対して「WebSocketプロトコルを使用するよ」というメッセージをHTTP GETで送ることで、80番ポートで繋がったコネクションをそのままWebSocketプロトコルにアップグレードするようになっています。そのため、80番以外のポートを新たに開ける必要がないのです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>現在、jQueryを代表例として様々なJavaScriptのライブラリがあり、近年爆発的な広がりをみせています。今後、WebSocketを活用したアプリケーションレベルのプロトコルが次々と生まれ、JavaScriptのライブラリとして普及していくでしょう。さらにはプロトコルを開発するフレームワークも生み出され、プロトコルの多様化が加速していくのではないでしょうか。これはプロトコルの標準化にとっても大きな意味を持ちます。つまり、もはやWebSocketより上位のプロトコルについては、あらかじめマシンにインストールすることなく簡単に使えるため、わざわざ標準化する必要がなくなるのです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>このように現在は、WebSocketの上に様々な独自のプロトコルが次々と生まれる、いわば「プロトコル爆発」の時代の幕開けにあるかもしれません。<br>以上、WebSocketの意味を私なりにまとめてみました。ところでWebSocketでどのようなことが可能になるのでしょうか。これについては、既にネット上に多くの例がありますので調べてみて下さい。このサイトでも、別途、WebSocketを使った面白い応用例を紹介したいと考えています。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-02-22 19:24:09",
+    "modified": "2019-04-09 18:23:31",
+    "slug": "websocket%e3%81%8c%e3%82%82%e3%81%9f%e3%82%89%e3%81%99%e3%80%8c%e3%83%97%e3%83%ad%e3%83%88%e3%82%b3%e3%83%ab%e7%88%86%e7%99%ba%e3%80%8d",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "JavaScript",
+      "programming",
+      "web"
+    ],
+    "tags": [
+      "JavaScript",
+      "protocol",
+      "WebSocket"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/260",
+    "featuredImageId": 258,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/02/WebSocket02.png"
+  },
+  {
+    "id": 152,
+    "title": "文化庁メディア芸術祭にて",
+    "content": "<!-- wp:image {\"id\":243,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/media_festival.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/02/media_festival.jpg\" alt=\"\" class=\"wp-image-243\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p><br>本日、国立新美術館（東京・六本木）で開催されているメディア芸術祭に行ってきました。平日（水曜日）にも関わらず、結構な人出でした。作品は映像作品が多かったのですが、いくつかはyoutubeでも見られます。<a title=\"Naverまとめ\" rel=\"noopener noreferrer\" href=\"http://matome.naver.jp/odai/2136108433662728101\" target=\"_blank\">Naverまとめサイト</a>で、いくつかの作品がまとめられてます。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>ただし、展示物と同じではなく、抜粋や以前のバージョンが含まれますので、会場に近い人は現物を見るのをおすすめします。アート部門の大賞を受賞した「Pendulum Choir」は現物の展示はなく、パフォーマンス映像でしたので、これは以下のyoutubeで十分かもしれません。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:core-embed/youtube {\"url\":\"http://youtu.be/vsXs3GUrw64\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed-youtube wp-block-embed is-type-video is-provider-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttp://youtu.be/vsXs3GUrw64\n</div></figure>\n<!-- /wp:core-embed/youtube -->\n\n<!-- wp:paragraph -->\n<p>この作品は、9人のアカペラと18の油圧ジャッキで作られた、いわば「人間楽器」であり、人間をいろいろな方向に向きを変えることで音響効果を変化させるというもの。人間という楽器を扱うので、もはやアカペラではなくなっているというべきでしょうか。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":244,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://web.fujimura.com/blog/wp-content/uploads/2013/02/species.jpg\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/02/species.jpg\" alt=\"\" class=\"wp-image-244\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>入り口のすぐそばにいきなり、これ。なぜ、こんなところにゴミが捨てられているのかと驚きますが、実は『Species series』という作品。。。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:core-embed/youtube {\"url\":\"http://youtu.be/YzBzHUC7juA\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed-youtube wp-block-embed is-type-video is-provider-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\"><div class=\"wp-block-embed__wrapper\">\nhttp://youtu.be/YzBzHUC7juA\n</div></figure>\n<!-- /wp:core-embed/youtube -->\n\n<!-- wp:paragraph -->\n<p>個人的には他に<a rel=\"noopener noreferrer\" href=\"http://www.youtube.com/watch?v=29MD29ekoKI\" target=\"_blank\">『水道橋重工「KURATAS」』</a>、<a rel=\"noopener noreferrer\" href=\"http://www.youtube.com/watch?v=zqq1RVNww8U\" target=\"_blank\">『はじめよう』</a>、<a rel=\"noopener noreferrer\" href=\"http://www.youtube.com/watch?v=boIYotX_IOw\" target=\"_blank\">『Oh Willy...』</a>という作品が好きでした。それから『あさっての森』もたいへん楽しい内容でした。全体に、微笑ましい作品が多かったと思います。今週末（2/24)まで開催されています。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-02-20 21:44:55",
+    "modified": "2019-04-10 18:57:33",
+    "slug": "%e6%96%87%e5%8c%96%e5%ba%81%e3%83%a1%e3%83%87%e3%82%a3%e3%82%a2%e8%8a%b8%e8%a1%93%e7%a5%ad",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "event",
+      "media art"
+    ],
+    "tags": [
+      "国立新美術館"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/152",
+    "featuredImageId": 243,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/02/media_festival.jpg"
+  },
+  {
+    "id": 225,
+    "title": "戦国時代のジェネラティブ・アート",
+    "content": "<!-- wp:paragraph -->\n<p>先日のNHKの日曜美術館で、古美術鑑定家中島誠之助さんの案内で、<a href=\"http://www.nhk.or.jp/nichibi/weekly/2013/0217/index.html\">「初花」と呼ばれる重要文化財の茶入れ</a>が紹介されていました。この茶入れは800年程前に中国から伝来し、室町幕府第8代将軍の足利義政が所持した後、戦国時代に信長、秀吉、家康に引き継がれた名品とのことです。この初花には窯で焼いたときにうわぐすりが溶け出して形成された「なだれ」と呼ぶ模様があります。初花はこのなだれが奇跡的に３つもあり、その一つが底に到達手前でギリギリとまっているところが最大の特徴です。中島さんは、窯の中という「人為の及ばぬ」ところで形成される模様、そこに天下人達が心をひかれたのでは、とのお話でした（2月24日20:00再放送予定）。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p><a href=\"http://web.fujimura.com/blog/?p=203\">先日の記事</a>で、乱数やノイズによって「思いがけない美」を制作するジェネラティブ・アートについて書きましたが、この初花は、このようなアートの原型といえないでしょうか。もっともジェネラティブ・アートには「人為の及ばぬ」というところを、乱数やノイズによって「人為的に」発生させているところが少し異なるかもしれませんが。Wikipediaによるとジェネラティブ・アートの初期の作品としてモーツァルトの \"Musikalisches Würfelspiel\"（音楽のさいころ遊び）1757年が知られており、こちらは、さいころで人為的に乱数を生成して作曲しているとのことです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>どこまでがジェネラティブ・アートと呼べるのか難しいところですが、ノイズを窯の炎といった自然界まで拡張解釈すると、そもそもイケメンや美女も遺伝子の組み合わせという乱数によって生まれているものですので、人もジェネラティブ・アートとなってしまうかもしれませんね。いずれにしてもジェネラティブ・アートには天下人でなくても心が惹かれます。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-02-20 00:35:16",
+    "modified": "2019-04-10 18:59:30",
+    "slug": "hatsuhana",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "media art"
+    ],
+    "tags": [
+      "generative art",
+      "茶器"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/225",
+    "featuredImageId": 230,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/02/01.jpg"
+  },
+  {
+    "id": 203,
+    "title": "ジェネラティブ・アート",
+    "content": "<!-- wp:image {\"id\":208,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"https://www.google.co.jp/search?q=generative+art&amp;hl=ja&amp;tbo=d&amp;source=lnms&amp;tbm=isch\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/02/Search_Generative_art.png\" alt=\"\" class=\"wp-image-208\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>普通、芸術作品（ここでは美しい絵など）を制作するには、まず最初にアーティストが作りたいと思う作品のイメージを頭の中につくり、そのイメージにできるだけ近くなるように、絵筆をとって描くという順番になると思います。したがって、その世界の創造主たる作家は、その作品の隅々まで自分の「意図」で作っているわけです。これはあたりまえですよね。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>ところが、アーティストとコンピュータとの協調作業により、作家が当初は意図していなかった「思いがけない美」を追求するアートがあります。これはジェネラティブ・アート（Generative art）と呼ばれています。<br>具体的にどのようなものがあるかは、画像検索で\"Generative art\"と検索してみましょう（以下の画像をクリック）。多くの作品がありますね。<br></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>このようなジェネラティブ・アートの作り方は、まずはじめに作品のだいたいの構造を決めるプログラムを作ります。ただし、作品の要素となるオブジェクトのサイズや色や方向等のパラメータに関数や乱数を導入することで、何度かプログラムを動かすことで「思いがけない美」が発生する仕組みを組み込んでおきます。そして、そのプログラムの実行を何度も繰り返すとともに、大枠となるプログラムをブラシュアップをすることで、よい作品を「発生」させるというわけです。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>では優秀なプログラマであれば、よい作品ができるかというとそうではありません。たまたま発生した「よい作品」をよい作品と判断する目利きする力が必要です。よい作品かどうかを見分ける人を「キュレーター」と呼びますが、まさに、キュレーションの力が必要となるわけです。極端なことをいうと、ジェネラティブ・アートでは、</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>　創作活動　＝　プログラミング　＋　キュレーション</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:image {\"id\":209,\"align\":\"center\",\"linkDestination\":\"custom\"} -->\n<div class=\"wp-block-image\"><figure class=\"aligncenter\"><a href=\"http://www.bnn.co.jp/books/title_index/web/processing.html\"><img src=\"https://web.fujimura.com/wp-content/uploads/2013/02/generative_art.jpg\" alt=\"\" class=\"wp-image-209\"/></a></figure></div>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>ということになるかもしれません。すなわち、私のように絵を描くのがあまり上手ではない人でも、よい作品かどうかを見分ける力があれば、アーティストになれる可能性があるという分野といえるかもしれません。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>最近、このようなジェネラティブ・アートに関する入門書が出版されました。この本では、ジェネラティブ・アートの概念を説明するとともに豊富なコード例があります。例えば、パラメータに与える乱数をどのように発生させるかは重要なポイントですが、rand()関数のような一様乱数では、必ずしも自然で美しい作品とはならないケースがあります。そのような場合には、パーリンノイズ(perlin noise)と呼ぶノイズを導入する方法があります。このようなジェネラティブ・アートのポイントを分かりやすく説明しています。尚、パーリンノイズについては、後日、改めて例を交えて紹介します。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-02-18 19:15:02",
+    "modified": "2019-04-10 19:02:12",
+    "slug": "%e3%82%b8%e3%82%a7%e3%83%8d%e3%83%a9%e3%83%86%e3%82%a3%e3%83%96%e3%83%bb%e3%82%a2%e3%83%bc%e3%83%88",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "media art"
+    ],
+    "tags": [
+      "generative art",
+      "perlin noise"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/203",
+    "featuredImageId": 209,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/02/generative_art.jpg"
+  },
+  {
+    "id": 958,
+    "title": "最初の記事",
+    "content": "<!-- wp:image {\"id\":666} -->\n<figure class=\"wp-block-image\"><img src=\"https://web.fujimura.com/wp-content/uploads/2014/05/fujimura_logo3.gif\" alt=\"\" class=\"wp-image-666\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:paragraph -->\n<p>Amazon Web ServiceのEC2上にゼミ実習用のサーバを構築してきましたが、本日、このサーバにEC2 ElasticIPサービスで、固定IPアドレスを付与するとともに、既に持っていたfujimura.comドメインのDNSレコードに\"web\"エントリを追加し、web.fujimura.comで参照できるように設定しました。これまで、ゼミで使っていたEC2のサーバのURLは使えなくなりましたので、これからは\"web.fujimura.com\"でアクセスするように変更お願い致します。</p>\n<!-- /wp:paragraph -->",
+    "excerpt": "",
+    "date": "2013-02-09 00:36:43",
+    "modified": "2019-04-10 19:08:17",
+    "slug": "%e6%9c%80%e5%88%9d%e3%81%ae%e8%a8%98%e4%ba%8b",
+    "status": "publish",
+    "type": "post",
+    "author": "fujimura",
+    "categories": [
+      "web",
+      "wordpress"
+    ],
+    "tags": [
+      "AWS",
+      "DNS"
+    ],
+    "link": "https://web.fujimura.com/blog/archives/958",
+    "featuredImageId": 101,
+    "featuredImageUrl": "https://web.fujimura.com/wp-content/uploads/2013/02/fujimura_logo3.gif"
   }
 ]
