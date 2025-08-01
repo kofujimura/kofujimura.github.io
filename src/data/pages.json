@@ -35,7 +35,7 @@
   {
     "id": 655,
     "title": "このサイトについて",
-    "content": "このサイトは大妻女子大学、社会情報学部、藤村ゼミのサイトです。2013年2月よりスタートしました。\nこのサイトでは、主に本ゼミ生および他大学の学部生を対象とする、次のような情報を掲載していきます（予定）。\n<blockquote>ゼミの紹介</blockquote>\n<blockquote>イベントの案内等</blockquote>\n<blockquote>学生が製作したWebサイトの作品の紹介</blockquote>\n<blockquote>学生の卒論研究の紹介</blockquote>\n<blockquote>教官からの新しい技術の紹介</blockquote>\nゼミメンバは、アカウントを作りますので、積極的に記事を投稿して下さい。",
+    "content": "このサイトは大妻女子大学、社会情報学部、藤村ゼミのサイトです。2013年2月よりスタートし、<a href=\"https://web.fujimura.com/blog/archives/1322/\">2025年6月にWordPressからNext.js 15へリニューアル</a>しました。\n\n<h2>サイトについて</h2>\nこのサイトでは、主に本ゼミ生および他大学の学部生を対象とする、次のような情報を掲載しています。\n<blockquote>ゼミの紹介</blockquote>\n<blockquote>イベントの案内等</blockquote>\n<blockquote>学生が製作したWebサイトの作品の紹介</blockquote>\n<blockquote>学生の卒論研究の紹介</blockquote>\n<blockquote>教員からの新しい技術の紹介</blockquote>\n\n<h2>教員について</h2>\n藤村ゼミの指導教員は藤村考です。詳しい情報は<a href=\"https://www.fujimura.com\">個人サイト</a>をご覧ください。\n\n<h2>記事投稿について</h2>\n学生からの記事投稿は、<a href=\"https://github.com/kofujimura/kofujimura.github.io\">GitHub</a>へのプルリクエストで受け付けています。積極的に記事を投稿してください。",
     "date": "2013-02-09 00:15:32",
     "modified": "2019-04-08 16:38:45",
     "slug": "description",
