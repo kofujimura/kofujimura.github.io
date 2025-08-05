@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "node scripts/sync-posts.js && next build",
-    "export": "node scripts/sync-posts.js && next build",
+    "build": "node scripts/sync-posts.js && tsx scripts/optimize-images.ts && next build",
+    "export": "node scripts/sync-posts.js && tsx scripts/optimize-images.ts && next build",
     "deploy": "npm run export && touch out/.nojekyll",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "optimize-images": "tsx scripts/optimize-images.ts"
   },
   "dependencies": {
     "@types/xml2js": "^0.4.14",
@@ -26,6 +27,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
+    "sharp": "^0.34.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

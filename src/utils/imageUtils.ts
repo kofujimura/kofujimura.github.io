@@ -1,7 +1,7 @@
 // Image processing utilities for WordPress content migration
 
 export function processWordPressImages(content: string): string {
-  // Replace WordPress image URLs with Next.js Image optimization
+  // Replace WordPress image URLs with optimized picture elements
   return content
     .replace(
       /<img([^>]*)\s+src="([^"]*)"([^>]*)>/gi,
@@ -11,21 +11,68 @@ export function processWordPressImages(content: string): string {
           return match;
         }
 
-        // Handle WordPress uploads
-        if (src.includes('wp-content/uploads/')) {
-          // URLs are already absolute from the XML data
-          return `<img${beforeSrc} src="${src}"${afterSrc} loading="lazy" style="max-width: 100%; height: auto;" />`;
-        }
-
-        // Handle relative URLs (for GitHub Pages)
-        if (src.startsWith('/')) {
-          return `<img${beforeSrc} src="${src}"${afterSrc} loading="lazy" style="max-width: 100%; height: auto;" />`;
-        }
-
-        // Handle external URLs
-        return `<img${beforeSrc} src="${src}"${afterSrc} loading="lazy" style="max-width: 100%; height: auto;" />`;
+        // Generate optimized image markup
+        return generateOptimizedImageMarkup(src, beforeSrc + afterSrc);
       }
     );
+}
+
+export function generateOptimizedImageMarkup(src: string, attributes: string = ''): string {
+  // Extract file extension and create base path
+  const ext = src.split('.').pop()?.toLowerCase();
+  const basePath = src.slice(0, -(ext?.length || 0) - 1);
+  
+  // Define responsive breakpoints
+  const breakpoints = [320, 640, 960, 1280, 1920];
+  
+  // Generate srcSet for each format
+  const generateSrcSet = (format: string) => {
+    return breakpoints
+      .map(size => `${basePath}-${size}w.${format} ${size}w`)
+      .join(', ');
+  };
+  
+  // Extract alt text from attributes if present
+  const altMatch = attributes.match(/alt="([^"]*)"/i);
+  const alt = altMatch ? altMatch[1] : '';
+  
+  // Extract class from attributes if present
+  const classMatch = attributes.match(/class="([^"]*)"/i);
+  const className = classMatch ? classMatch[1] : '';
+  
+  // Generate sizes attribute for responsive behavior
+  const sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw';
+  
+  // Fallback to optimized original
+  const fallbackSrc = `${basePath}-optimized.${ext}`;
+  
+  return `
+    <picture>
+      <source
+        srcset="${generateSrcSet('avif')}"
+        sizes="${sizes}"
+        type="image/avif"
+      />
+      <source
+        srcset="${generateSrcSet('webp')}"
+        sizes="${sizes}"
+        type="image/webp"
+      />
+      <source
+        srcset="${generateSrcSet(ext || 'png')}"
+        sizes="${sizes}"
+        type="image/${ext === 'jpg' ? 'jpeg' : ext}"
+      />
+      <img
+        src="${fallbackSrc}"
+        alt="${alt}"
+        class="${className}"
+        loading="lazy"
+        decoding="async"
+        style="max-width: 100%; height: auto;"
+      />
+    </picture>
+  `.trim();
 }
 
 export function extractImageUrls(content: string): string[] {

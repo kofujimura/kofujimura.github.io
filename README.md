@@ -5,7 +5,7 @@ WordPressから移行したNext.js製の静的サイトです。GitHub Pagesで�
 ## サイト情報
 
 - **URL**: https://kofujimura.github.io/
-- **技術スタック**: Next.js 15, TypeScript, Tailwind CSS
+- **技術スタック**: Next.js 15, TypeScript, Tailwind CSS, Sharp (画像最適化)
 - **ホスティング**: GitHub Pages
 - **自動デプロイ**: GitHub Actions
 
@@ -61,21 +61,33 @@ WordPressから移行したNext.js製の静的サイトです。GitHub Pagesで�
 
 **画像配置のベストプラクティス**:
 - **新規画像**: `public/images/記事ID/` または `public/images/年月/` に整理して配置
-- **画像最適化**: WebP形式の使用を推奨、適切なサイズにリサイズ
+- **画像最適化**: 自動で AVIF・WebP・最適化PNG/JPEG が生成されます
+- **レスポンシブ対応**: 5つのサイズ (320w, 640w, 960w, 1280w, 1920w) が自動生成
 - **alt属性**: 必ず適切な代替テキストを設定
-- **レスポンシブ対応**: `style="max-width: 100%; height: auto;"` を追加推奨
+- **現代ブラウザ対応**: AVIF → WebP → 元フォーマットの順で配信
 
 **例**:
 ```html
-<!-- 新しい記事の画像例 -->
+<!-- 新しい記事の画像例（自動で最適化されます） -->
 <img src="/images/2025/01/project-screenshot.jpg" 
-     alt="プロジェクトのスクリーンショット" 
-     style="max-width: 100%; height: auto;" />
+     alt="プロジェクトのスクリーンショット" />
 
-<!-- WordPress継承画像例 -->
+<!-- WordPress継承画像例（自動で最適化されます） -->
 <img src="/wp-content/uploads/2024/01/existing-image.png" 
-     alt="既存の画像" 
-     style="max-width: 100%; height: auto;" />
+     alt="既存の画像" />
+```
+
+**React コンポーネント使用例**:
+```tsx
+import { OptimizedImage } from '@/components/OptimizedImage';
+
+<OptimizedImage
+  src="/images/sample.jpg"
+  alt="サンプル画像"
+  width={800}
+  height={600}
+  priority={true}  // 重要な画像の場合
+/>
 ```
 
 ### 3. デプロイ
@@ -136,11 +148,14 @@ npm install
 # 開発サーバーの起動
 npm run dev
 
-# 静的サイトのビルド
+# 静的サイトのビルド（画像最適化含む）
 npm run build
 
-# 静的サイトのエクスポート
+# 静的サイトのエクスポート（画像最適化含む）
 npm run export
+
+# 画像最適化のみ実行
+npm run optimize-images
 ```
 
 ## ファイル構成
@@ -152,21 +167,58 @@ src/
 │   ├── page.tsx           # トップページ（記事一覧）
 │   └── layout.tsx         # 共通レイアウト
 ├── components/
-│   └── Navigation.tsx     # ナビゲーションコンポーネント
+│   ├── Navigation.tsx     # ナビゲーションコンポーネント
+│   └── OptimizedImage.tsx # 最適化画像コンポーネント
 ├── data/
 │   ├── posts.json        # 記事データ
 │   ├── pages.json        # 固定ページデータ
 │   └── attachments.json  # 添付ファイルデータ
-└── utils/
-    └── imageUtils.ts     # 画像処理ユーティリティ
+├── utils/
+│   └── imageUtils.ts     # 画像処理ユーティリティ
+└── scripts/
+    ├── create-post.js    # 記事作成スクリプト
+    ├── migrate-images.js # 画像移行スクリプト
+    └── optimize-images.ts # 画像最適化スクリプト
 ```
 
 ## 注意事項
 
 1. **記事ID**: 既存の記事IDと重複しないように注意
-2. **画像最適化**: 大きな画像はできるだけ圧縮してから使用
+2. **画像最適化**: ビルド時に自動で最適化されるため、元画像をそのままアップロード可能
 3. **HTML**: 記事内容はHTMLエスケープされないため、適切なHTMLを記述
 4. **URL構造**: 記事URLは`/blog/archives/[id]/`の形式を維持
+5. **画像フォーマット**: PNG・JPEG・WebP・AVIFがサポートされています
+
+## 画像最適化システム
+
+### 自動最適化の詳細
+
+- **実行タイミング**: `npm run build` および `npm run export` 時に自動実行
+- **対象ディレクトリ**: `public/images/` と `public/wp-content/uploads/`
+- **生成される形式**:
+  - AVIF（最新・最高効率）
+  - WebP（広くサポート）
+  - 最適化PNG/JPEG（フォールバック）
+- **レスポンシブサイズ**: 320w, 640w, 960w, 1280w, 1920w
+- **圧縮率**: 80%品質、90-99%のファイルサイズ削減を実現
+
+### 最適化の効果
+
+- **PageSpeed Insights**: 大幅なスコア向上
+- **ロード時間**: 画像ダウンロード時間を大幅短縮
+- **帯域幅**: サーバー転送量の削減
+- **ユーザー体験**: 高速な画像表示
+
+### 手動最適化
+
+```bash
+# 画像最適化のみ実行
+npm run optimize-images
+
+# 特定画像の確認
+ls public/images/sample-320w.webp
+ls public/images/sample-optimized.png
+```
 
 ## トラブルシューティング
 
@@ -179,8 +231,21 @@ npm run type-check
 # リンターチェック
 npm run lint
 
-# ローカルでビルドテスト
+# ローカルでビルドテスト（画像最適化含む）
 npm run build
+```
+
+### 画像最適化関連のトラブル
+
+```bash
+# Sharp の再インストール
+npm uninstall sharp
+npm install sharp --save-dev
+
+# 最適化画像のクリア（必要に応じて）
+find public/images -name "*-*w.webp" -delete
+find public/images -name "*-*w.avif" -delete
+find public/images -name "*-optimized.*" -delete
 ```
 
 ### GitHub Actions失敗時

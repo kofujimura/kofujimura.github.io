@@ -3,7 +3,7 @@
     "name": "kofujimura.github.io",
     "description": "Next.js製の静的サイト（ヘッドレスCMS）",
     "type": "website",
-    "tech_stack": ["Next.js 15", "TypeScript", "Tailwind CSS"],
+    "tech_stack": ["Next.js 15", "TypeScript", "Tailwind CSS", "Sharp"],
     "hosting": "GitHub Pages",
     "deployment": "GitHub Actions",
     "url": "https://kofujimura.github.io/"
@@ -12,7 +12,7 @@
     "purpose": "記事投稿とサイト管理の自動化",
     "capabilities": [
       "記事作成・投稿",
-      "画像管理",
+      "画像管理・最適化",
       "デプロイメント",
       "コンテンツ管理"
     ],
@@ -31,7 +31,8 @@
     "scripts": {
       "create_post": "scripts/create-post.js",
       "get_next_id": "scripts/get-next-id.js",
-      "migrate_images": "scripts/migrate-images.js"
+      "migrate_images": "scripts/migrate-images.js",
+      "optimize_images": "scripts/optimize-images.ts"
     },
     "assets": {
       "new_images": "public/images/",
@@ -90,7 +91,17 @@
     "image_handling": {
       "upload_location": "public/images/",
       "reference_format": "/images/filename.jpg",
-      "optimization": "WebP推奨、適切なサイズにリサイズ"
+      "optimization": {
+        "formats": ["AVIF", "WebP", "PNG/JPEG"],
+        "responsive_sizes": [320, 640, 960, 1280, 1920],
+        "compression": "80% quality",
+        "automation": "ビルド時自動実行",
+        "manual_command": "npm run optimize-images"
+      },
+      "components": {
+        "react": "src/components/OptimizedImage.tsx",
+        "html_processing": "src/utils/imageUtils.ts"
+      }
     }
   },
   "limitations": {
@@ -105,10 +116,13 @@
     "data_loss_prevention": "add-directコマンドは既存データを保護し追記のみ実行"
   },
   "meta": {
-    "version": "1.1",
-    "last_updated": "2025-07-19",
+    "version": "1.2",
+    "last_updated": "2025-08-05",
     "ai_context_preserved": true,
     "human_readable_docs": "README.md",
-    "changelog": "v1.1: データ保護とAgent誤解防止のための記載を明確化"
+    "changelog": {
+      "v1.2": "画像最適化システム追加（AVIF/WebP生成、レスポンシブ対応、自動化）",
+      "v1.1": "データ保護とAgent誤解防止のための記載を明確化"
+    }
   }
 }
