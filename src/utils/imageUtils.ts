@@ -22,9 +22,8 @@ export function generateOptimizedImageMarkup(src: string, attributes: string = '
   const ext = src.split('.').pop()?.toLowerCase();
   const basePath = src.slice(0, -(ext?.length || 0) - 1);
   
-  // Check if this is a new image (in /images/) or old WordPress image (in /wp-content/uploads/)
+  // Check if this is a new image (in /images/)
   const isNewImage = src.startsWith('/images/');
-  const isWordPressImage = src.startsWith('/wp-content/uploads/');
   
   // Extract alt text from attributes if present
   const altMatch = attributes.match(/alt="([^"]*)"/i);
