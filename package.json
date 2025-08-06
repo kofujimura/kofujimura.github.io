@@ -9,7 +9,10 @@
     "deploy": "npm run export && touch out/.nojekyll",
     "start": "next start",
     "lint": "next lint",
-    "optimize-images": "tsx scripts/optimize-images.ts"
+    "optimize-images": "tsx scripts/optimize-images.ts",
+    "cleanup-images": "tsx scripts/cleanup-duplicate-images.ts",
+    "find-unused-images": "tsx scripts/find-unused-images.ts",
+    "delete-unused-images": "tsx scripts/find-unused-images.ts delete"
   },
   "dependencies": {
     "@types/xml2js": "^0.4.14",

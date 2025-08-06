@@ -23,7 +23,16 @@ async function findImages(dir: string): Promise<string[]> {
     if (item.isDirectory()) {
       files.push(...await findImages(fullPath));
     } else if (/\.(png|jpe?g)$/i.test(item.name)) {
-      files.push(fullPath);
+      // Skip already optimized files to prevent duplicate processing
+      const isOptimized = 
+        /-\d+w\.(png|jpe?g|webp|avif)$/i.test(item.name) || // Has size suffix
+        /-optimized\.(png|jpe?g)$/i.test(item.name) || // Has optimized suffix
+        /-\d+w-\d+w/i.test(item.name) || // Multiple size suffixes (duplicates)
+        /-optimized-optimized/i.test(item.name); // Multiple optimized suffixes
+      
+      if (!isOptimized) {
+        files.push(fullPath);
+      }
     }
   }
   
