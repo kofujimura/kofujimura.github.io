@@ -22,15 +22,9 @@ export function generateOptimizedImageMarkup(src: string, attributes: string = '
   const ext = src.split('.').pop()?.toLowerCase();
   const basePath = src.slice(0, -(ext?.length || 0) - 1);
   
-  // Define responsive breakpoints
-  const breakpoints = [320, 640, 960, 1280, 1920];
-  
-  // Generate srcSet for each format
-  const generateSrcSet = (format: string) => {
-    return breakpoints
-      .map(size => `${basePath}-${size}w.${format} ${size}w`)
-      .join(', ');
-  };
+  // Check if this is a new image (in /images/) or old WordPress image (in /wp-content/uploads/)
+  const isNewImage = src.startsWith('/images/');
+  const isWordPressImage = src.startsWith('/wp-content/uploads/');
   
   // Extract alt text from attributes if present
   const altMatch = attributes.match(/alt="([^"]*)"/i);
@@ -40,39 +34,62 @@ export function generateOptimizedImageMarkup(src: string, attributes: string = '
   const classMatch = attributes.match(/class="([^"]*)"/i);
   const className = classMatch ? classMatch[1] : '';
   
-  // Generate sizes attribute for responsive behavior
-  const sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw';
+  // For new images: generate optimized picture element with responsive images
+  if (isNewImage) {
+    // Define responsive breakpoints
+    const breakpoints = [320, 640, 960, 1280, 1920];
+    
+    // Generate srcSet for each format
+    const generateSrcSet = (format: string) => {
+      return breakpoints
+        .map(size => `${basePath}-${size}w.${format} ${size}w`)
+        .join(', ');
+    };
+    
+    // Generate sizes attribute for responsive behavior
+    const sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw';
+    
+    // Fallback to optimized original
+    const fallbackSrc = `${basePath}-optimized.${ext}`;
+    
+    return `
+      <picture>
+        <source
+          srcset="${generateSrcSet('avif')}"
+          sizes="${sizes}"
+          type="image/avif"
+        />
+        <source
+          srcset="${generateSrcSet('webp')}"
+          sizes="${sizes}"
+          type="image/webp"
+        />
+        <source
+          srcset="${generateSrcSet(ext || 'png')}"
+          sizes="${sizes}"
+          type="image/${ext === 'jpg' ? 'jpeg' : ext}"
+        />
+        <img
+          src="${fallbackSrc}"
+          alt="${alt}"
+          class="${className}"
+          loading="lazy"
+          decoding="async"
+          style="max-width: 100%; height: auto;"
+        />
+      </picture>
+    `.trim();
+  }
   
-  // Fallback to optimized original
-  const fallbackSrc = `${basePath}-optimized.${ext}`;
-  
-  return `
-    <picture>
-      <source
-        srcset="${generateSrcSet('avif')}"
-        sizes="${sizes}"
-        type="image/avif"
-      />
-      <source
-        srcset="${generateSrcSet('webp')}"
-        sizes="${sizes}"
-        type="image/webp"
-      />
-      <source
-        srcset="${generateSrcSet(ext || 'png')}"
-        sizes="${sizes}"
-        type="image/${ext === 'jpg' ? 'jpeg' : ext}"
-      />
-      <img
-        src="${fallbackSrc}"
-        alt="${alt}"
-        class="${className}"
-        loading="lazy"
-        decoding="async"
-        style="max-width: 100%; height: auto;"
-      />
-    </picture>
-  `.trim();
+  // For old WordPress images: return simple img tag with original file
+  return `<img
+    src="${src}"
+    alt="${alt}"
+    class="${className}"
+    loading="lazy"
+    decoding="async"
+    style="max-width: 100%; height: auto;"
+  />`;
 }
 
 export function extractImageUrls(content: string): string[] {

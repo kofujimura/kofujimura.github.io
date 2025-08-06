@@ -126,12 +126,15 @@ async function optimizeImage(inputPath: string): Promise<void> {
 }
 
 async function main() {
+  // Only optimize new images in /images/ directory
+  // Old WordPress images in /wp-content/uploads/ will use original files
   const imagePaths = [
-    'public/images',
-    'public/wp-content/uploads'
+    'public/images'
   ];
   
   console.log('Starting image optimization...');
+  console.log('📝 Note: Only optimizing new images in /images/ directory');
+  console.log('📝 WordPress images in /wp-content/uploads/ will use original files');
   
   for (const imagePath of imagePaths) {
     const fullPath = path.join(process.cwd(), imagePath);
