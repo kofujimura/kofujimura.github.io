@@ -50,12 +50,32 @@ export function generateStaticParams() {
       return {
         slug: pathParts.length > 0 ? pathParts : [page.slug],
       };
+    })
+    .filter(({ slug }) => {
+      // Exclude image paths from static generation
+      const path = slug.join('/');
+      return !path.startsWith('images/') && 
+             !path.includes('.avif') && 
+             !path.includes('.webp') && 
+             !path.includes('.png') && 
+             !path.includes('.jpg') && 
+             !path.includes('.jpeg');
     });
 }
 
 export default async function PageComponent({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
   const requestedSlug = getSlugFromPath(slug);
+  
+  // Reject image requests that somehow reach this route
+  if (requestedSlug.startsWith('images/') || 
+      requestedSlug.includes('.avif') || 
+      requestedSlug.includes('.webp') || 
+      requestedSlug.includes('.png') || 
+      requestedSlug.includes('.jpg') || 
+      requestedSlug.includes('.jpeg')) {
+    notFound();
+  }
   
   // Try to find page by slug first
   let page = pages.find((p) => p.slug === requestedSlug && p.status === 'publish');
