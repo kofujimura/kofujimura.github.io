@@ -39,8 +39,6 @@ export function OptimizedImage({
   // vs wp-content/uploads (older images that use original files)
   const isNewImage = src.startsWith('/images/');
   
-  // Fallback strategy: optimized version for new images, original for old images
-  const fallbackSrc = isNewImage ? `${basePath}-optimized.${ext}` : src;
   
   // For old images, just return simple img tag to avoid 404s on optimized versions
   if (!isNewImage) {
