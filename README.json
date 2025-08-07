@@ -91,16 +91,32 @@
     "image_handling": {
       "upload_location": "public/images/",
       "reference_format": "/images/filename.jpg",
+      "requirements": {
+        "minimum_size": "1280px以上の幅を推奨（960w/1280wファイル生成のため）",
+        "supported_formats": ["PNG", "JPEG", "JPG"],
+        "naming_convention": "英数字とハイフンのみ（日本語不可）"
+      },
       "optimization": {
-        "formats": ["AVIF", "WebP", "PNG/JPEG"],
-        "responsive_sizes": [320, 640, 960, 1280, 1920],
+        "formats": ["AVIF", "WebP", "Original format"],
+        "responsive_sizes": [320, 640, 960, 1280],
         "compression": "80% quality",
-        "automation": "ビルド時自動実行",
-        "manual_command": "npm run optimize-images"
+        "automation": "ビルド時自動実行（npx tsx scripts/optimize-images.ts）",
+        "manual_command": "npx tsx scripts/optimize-images.ts",
+        "file_size_reduction": "90-99%の削減効果"
+      },
+      "display_behavior": {
+        "top_page": "3カラムグリッド用（sizes: 33vw）",
+        "article_page": "コンテンツ用（sizes: 800px固定）",
+        "browser_selection": "AVIF → WebP → Original の優先順位"
       },
       "components": {
         "react": "src/components/OptimizedImage.tsx",
         "html_processing": "src/utils/imageUtils.ts"
+      },
+      "fallback_strategy": {
+        "missing_sizes": "小さいサイズから自動コピー生成",
+        "old_images": "オリジナルファイルをそのまま使用",
+        "error_handling": "元画像への自動フォールバック"
       }
     }
   },
@@ -116,11 +132,12 @@
     "data_loss_prevention": "add-directコマンドは既存データを保護し追記のみ実行"
   },
   "meta": {
-    "version": "1.2",
-    "last_updated": "2025-08-05",
+    "version": "1.3",
+    "last_updated": "2025-08-07",
     "ai_context_preserved": true,
     "human_readable_docs": "README.md",
     "changelog": {
+      "v1.3": "画像最適化システム完成（4サイズ対応、表示サイズ最適化、フォールバック強化）",
       "v1.2": "画像最適化システム追加（AVIF/WebP生成、レスポンシブ対応、自動化）",
       "v1.1": "データ保護とAgent誤解防止のための記載を明確化"
     }

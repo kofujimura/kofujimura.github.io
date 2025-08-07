@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Exclude image files from being treated as pages
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   // Note: allowedDevOrigins is not yet available in Next.js 15
   // The CORS warning can be safely ignored in development
 };

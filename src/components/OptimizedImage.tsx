@@ -16,7 +16,7 @@ export function OptimizedImage({
   alt, 
   width, 
   height, 
-  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+  sizes = '(max-width: 768px) 100vw, 800px',
   className = '',
   loading = 'lazy',
   priority = false
@@ -25,45 +25,28 @@ export function OptimizedImage({
   const ext = src.split('.').pop()?.toLowerCase();
   const basePath = src.slice(0, -(ext?.length || 0) - 1);
   
-  // Define responsive breakpoints
-  const breakpoints = [320, 640, 960, 1280, 1920];
+  // Complete set of responsive breakpoints
+  const safeBreakpoints = [320, 640, 960, 1280];
   
-  // Generate srcSet for each format
+  // Generate srcSet only for sizes that should exist
   const generateSrcSet = (format: string) => {
-    return breakpoints
+    return safeBreakpoints
       .map(size => `${basePath}-${size}w.${format} ${size}w`)
       .join(', ');
   };
   
-  // Fallback to original if optimized versions don't exist
-  const fallbackSrc = `${basePath}-optimized.${ext}`;
+  // Check if we're dealing with images in /images/ directory (should have optimized versions)
+  // vs wp-content/uploads (older images that use original files)
+  const isNewImage = src.startsWith('/images/');
   
-  return (
-    <picture>
-      {/* AVIF format (most efficient) */}
-      <source
-        srcSet={generateSrcSet('avif')}
-        sizes={sizes}
-        type="image/avif"
-      />
-      
-      {/* WebP format (widely supported) */}
-      <source
-        srcSet={generateSrcSet('webp')}
-        sizes={sizes}
-        type="image/webp"
-      />
-      
-      {/* Fallback to optimized original format */}
-      <source
-        srcSet={generateSrcSet(ext || 'png')}
-        sizes={sizes}
-        type={`image/${ext === 'jpg' ? 'jpeg' : ext}`}
-      />
-      
-      {/* Final fallback image */}
+  // Fallback strategy: optimized version for new images, original for old images
+  const fallbackSrc = isNewImage ? `${basePath}-optimized.${ext}` : src;
+  
+  // For old images, just return simple img tag to avoid 404s on optimized versions
+  if (!isNewImage) {
+    return (
       <img
-        src={fallbackSrc}
+        src={src}
         alt={alt}
         width={width}
         height={height}
@@ -73,6 +56,46 @@ export function OptimizedImage({
         style={{
           maxWidth: '100%',
           height: 'auto'
+        }}
+      />
+    );
+  }
+
+  return (
+    <picture>
+      {/* AVIF format (most efficient) - only for new images */}
+      <source
+        srcSet={generateSrcSet('avif')}
+        sizes={sizes}
+        type="image/avif"
+      />
+      
+      {/* WebP format (widely supported) - only for new images */}
+      <source
+        srcSet={generateSrcSet('webp')}
+        sizes={sizes}
+        type="image/webp"
+      />
+      
+      {/* Always fallback to original image to prevent 404s */}
+      <img
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        className={className}
+        loading={priority ? 'eager' : loading}
+        decoding="async"
+        style={{
+          maxWidth: '100%',
+          height: 'auto'
+        }}
+        onError={(e) => {
+          // If optimized versions fail, ensure we use original
+          const target = e.target as HTMLImageElement;
+          if (target.src !== src) {
+            target.src = src;
+          }
         }}
       />
     </picture>

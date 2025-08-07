@@ -36,7 +36,7 @@ export function generateOptimizedImageMarkup(src: string, attributes: string = '
   // For new images: generate optimized picture element with responsive images
   if (isNewImage) {
     // Define responsive breakpoints
-    const breakpoints = [320, 640, 960, 1280, 1920];
+    const breakpoints = [320, 640, 960, 1280];
     
     // Generate srcSet for each format
     const generateSrcSet = (format: string) => {
@@ -45,8 +45,8 @@ export function generateOptimizedImageMarkup(src: string, attributes: string = '
         .join(', ');
     };
     
-    // Generate sizes attribute for responsive behavior
-    const sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw';
+    // Generate sizes attribute for content pages (larger images)
+    const sizes = '(max-width: 768px) 100vw, 800px';
     
     // Fallback to optimized original
     const fallbackSrc = `${basePath}-optimized.${ext}`;

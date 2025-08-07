@@ -41,7 +41,7 @@ function getSlugFromPath(slug: string[]): string {
 }
 
 export function generateStaticParams() {
-  return pages
+  const params = pages
     .filter(page => page.status === 'publish')
     .map((page) => {
       const urlPath = page.link.replace('https://web.fujimura.com/', '');
@@ -54,13 +54,20 @@ export function generateStaticParams() {
     .filter(({ slug }) => {
       // Exclude image paths from static generation
       const path = slug.join('/');
-      return !path.startsWith('images/') && 
-             !path.includes('.avif') && 
-             !path.includes('.webp') && 
-             !path.includes('.png') && 
-             !path.includes('.jpg') && 
-             !path.includes('.jpeg');
+      // More comprehensive image file exclusion
+      const isImagePath = path.startsWith('images/') || 
+                         path.includes('/images/') ||
+                         path.match(/\.(avif|webp|png|jpe?g|gif|svg|ico|bmp|tiff?)$/i) ||
+                         path.includes('-320w') ||
+                         path.includes('-640w') ||
+                         path.includes('-960w') ||
+                         path.includes('-1280w') ||
+                         path.includes('-optimized');
+      
+      return !isImagePath;
     });
+  
+  return params;
 }
 
 export default async function PageComponent({ params }: { params: Promise<{ slug: string[] }> }) {
@@ -68,12 +75,16 @@ export default async function PageComponent({ params }: { params: Promise<{ slug
   const requestedSlug = getSlugFromPath(slug);
   
   // Reject image requests that somehow reach this route
-  if (requestedSlug.startsWith('images/') || 
-      requestedSlug.includes('.avif') || 
-      requestedSlug.includes('.webp') || 
-      requestedSlug.includes('.png') || 
-      requestedSlug.includes('.jpg') || 
-      requestedSlug.includes('.jpeg')) {
+  const isImageRequest = requestedSlug.startsWith('images/') || 
+                        requestedSlug.includes('/images/') ||
+                        requestedSlug.match(/\.(avif|webp|png|jpe?g|gif|svg|ico|bmp|tiff?)$/i) ||
+                        requestedSlug.includes('-320w') ||
+                        requestedSlug.includes('-640w') ||
+                        requestedSlug.includes('-960w') ||
+                        requestedSlug.includes('-1280w') ||
+                        requestedSlug.includes('-optimized');
+  
+  if (isImageRequest) {
     notFound();
   }
   

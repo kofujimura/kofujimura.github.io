@@ -10,7 +10,7 @@ interface ImageOptimizationConfig {
 
 const config: ImageOptimizationConfig = {
   quality: 80,
-  sizes: [320, 640, 960, 1280, 1920], // Responsive breakpoints
+  sizes: [320, 640, 960, 1280], // Practical responsive breakpoints
   formats: ['webp', 'avif', 'png'] // Modern formats first, fallback to original
 };
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { OptimizedImage } from '@/components/OptimizedImage';
 import postsData from '@/data/posts.json';
 
 interface Post {
@@ -102,11 +103,10 @@ export default function Home() {
               {/* Image */}
               {post.featuredImageUrl && (
                 <div className="aspect-[4/3] overflow-hidden relative mx-4 mb-4 rounded-lg">
-                  <Image
+                  <OptimizedImage
                     src={post.featuredImageUrl}
                     alt={post.title}
-                    fill
-                    className="object-cover"
+                    className="object-cover w-full h-full"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
