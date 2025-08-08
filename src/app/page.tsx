@@ -1,10 +1,7 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import postsData from '@/data/posts.json';
 import Link from 'next/link';
 import { OptimizedImage } from '@/components/OptimizedImage';
-import postsData from '@/data/posts.json';
+import { SimpleLoadMore } from '@/components/SimpleLoadMore';
 
 interface Post {
   id: number;
@@ -45,97 +42,18 @@ function extractPlainText(html: string): string {
 }
 
 export default function Home() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(false);
-
+  const initialPosts = posts.slice(0, POSTS_PER_PAGE);
   const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
-
-  useEffect(() => {
-    const urlPage = searchParams.get('page');
-    const savedPage = sessionStorage.getItem('currentPage');
-    const savedPosts = sessionStorage.getItem('displayedPosts');
-    
-    if (urlPage && !isNaN(Number(urlPage))) {
-      const page = Math.min(Number(urlPage), totalPages);
-      loadPagesToPage(page);
-    } else if (savedPage && savedPosts) {
-      const page = Math.min(Number(savedPage), totalPages);
-      setCurrentPage(page);
-      setDisplayedPosts(JSON.parse(savedPosts));
-    } else {
-      loadPage(1);
-    }
-  }, [searchParams]);
-
-  const loadPagesToPage = async (targetPage: number) => {
-    setLoading(true);
-    
-    // Simulate loading delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const allPostsToShow = posts.slice(0, targetPage * POSTS_PER_PAGE);
-    setDisplayedPosts(allPostsToShow);
-    setCurrentPage(targetPage);
-    
-    // Save state
-    sessionStorage.setItem('currentPage', targetPage.toString());
-    sessionStorage.setItem('displayedPosts', JSON.stringify(allPostsToShow));
-    
-    setLoading(false);
-  };
-
-  const loadPage = async (page: number) => {
-    setLoading(true);
-    
-    // Simulate loading delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const startIndex = (page - 1) * POSTS_PER_PAGE;
-    const endIndex = startIndex + POSTS_PER_PAGE;
-    const pagesPosts = posts.slice(startIndex, endIndex);
-    
-    if (page === 1) {
-      setDisplayedPosts(pagesPosts);
-    } else {
-      setDisplayedPosts(prev => [...prev, ...pagesPosts]);
-    }
-    
-    setCurrentPage(page);
-    
-    // Save state
-    sessionStorage.setItem('currentPage', page.toString());
-    const newDisplayedPosts = page === 1 ? pagesPosts : [...displayedPosts, ...pagesPosts];
-    sessionStorage.setItem('displayedPosts', JSON.stringify(newDisplayedPosts));
-    
-    setLoading(false);
-  };
-
-  const handleLoadMore = () => {
-    if (currentPage < totalPages && !loading) {
-      const nextPage = currentPage + 1;
-      loadPage(nextPage);
-      
-      // Update URL without navigating
-      const url = new URL(window.location.href);
-      url.searchParams.set('page', nextPage.toString());
-      router.replace(url.pathname + url.search, { scroll: false });
-    }
-  };
-
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50">
-
       <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {displayedPosts.map((post) => (
+        <div id="posts-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {initialPosts.map((post) => (
             <article
               key={post.id}
               className="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-100"
             >
-              {/* Category Label */}
               {post.categories.length > 0 && (
                 <div className="px-4 pt-4 pb-2">
                   <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">
@@ -144,7 +62,6 @@ export default function Home() {
                 </div>
               )}
               
-              {/* Image */}
               {post.featuredImageUrl && (
                 <div className="aspect-[4/3] overflow-hidden relative mx-4 mb-4 rounded-lg">
                   <OptimizedImage
@@ -156,11 +73,10 @@ export default function Home() {
                 </div>
               )}
               
-              {/* Content */}
               <div className="px-4 pb-4">
                 <h2 className="text-lg font-bold text-gray-900 mb-2 leading-snug">
                   <Link 
-                    href={`/blog/archives/${post.id}?from=home&page=${currentPage}`}
+                    href={`/blog/archives/${post.id}`}
                     className="hover:text-blue-600 transition-colors"
                   >
                     {post.title}
@@ -178,29 +94,12 @@ export default function Home() {
             </article>
           ))}
         </div>
-
-        {loading && (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-2">読み込み中...</span>
-          </div>
-        )}
-
-        {currentPage < totalPages && !loading && (
-          <div className="flex justify-center mt-8">
-            <button
-              onClick={handleLoadMore}
-              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors duration-300 border border-gray-200 font-medium"
-            >
-              さらに読み込む ({Math.min(POSTS_PER_PAGE, posts.length - currentPage * POSTS_PER_PAGE)}件)
-            </button>
-          </div>
-        )}
-
-        {currentPage >= totalPages && (
-          <div className="text-center mt-8 text-gray-500">
-            全ての記事を表示しました ({posts.length}件)
-          </div>
+        
+        {totalPages > 1 && (
+          <SimpleLoadMore 
+            allPosts={posts} 
+            postsPerPage={POSTS_PER_PAGE}
+          />
         )}
       </main>
     </div>

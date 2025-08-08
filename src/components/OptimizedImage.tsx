@@ -88,13 +88,6 @@ export function OptimizedImage({
           maxWidth: '100%',
           height: 'auto'
         }}
-        onError={(e) => {
-          // If optimized versions fail, ensure we use original
-          const target = e.target as HTMLImageElement;
-          if (target.src !== src) {
-            target.src = src;
-          }
-        }}
       />
     </picture>
   );
