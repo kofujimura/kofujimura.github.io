@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import postsData from '@/data/posts.json';
@@ -44,6 +45,8 @@ function extractPlainText(html: string): string {
 }
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,8 +54,38 @@ export default function Home() {
   const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
 
   useEffect(() => {
-    loadPage(1);
-  }, []);
+    const urlPage = searchParams.get('page');
+    const savedPage = sessionStorage.getItem('currentPage');
+    const savedPosts = sessionStorage.getItem('displayedPosts');
+    
+    if (urlPage && !isNaN(Number(urlPage))) {
+      const page = Math.min(Number(urlPage), totalPages);
+      loadPagesToPage(page);
+    } else if (savedPage && savedPosts) {
+      const page = Math.min(Number(savedPage), totalPages);
+      setCurrentPage(page);
+      setDisplayedPosts(JSON.parse(savedPosts));
+    } else {
+      loadPage(1);
+    }
+  }, [searchParams]);
+
+  const loadPagesToPage = async (targetPage: number) => {
+    setLoading(true);
+    
+    // Simulate loading delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const allPostsToShow = posts.slice(0, targetPage * POSTS_PER_PAGE);
+    setDisplayedPosts(allPostsToShow);
+    setCurrentPage(targetPage);
+    
+    // Save state
+    sessionStorage.setItem('currentPage', targetPage.toString());
+    sessionStorage.setItem('displayedPosts', JSON.stringify(allPostsToShow));
+    
+    setLoading(false);
+  };
 
   const loadPage = async (page: number) => {
     setLoading(true);
@@ -71,12 +104,24 @@ export default function Home() {
     }
     
     setCurrentPage(page);
+    
+    // Save state
+    sessionStorage.setItem('currentPage', page.toString());
+    const newDisplayedPosts = page === 1 ? pagesPosts : [...displayedPosts, ...pagesPosts];
+    sessionStorage.setItem('displayedPosts', JSON.stringify(newDisplayedPosts));
+    
     setLoading(false);
   };
 
   const handleLoadMore = () => {
     if (currentPage < totalPages && !loading) {
-      loadPage(currentPage + 1);
+      const nextPage = currentPage + 1;
+      loadPage(nextPage);
+      
+      // Update URL without navigating
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', nextPage.toString());
+      router.replace(url.pathname + url.search, { scroll: false });
     }
   };
 
@@ -115,7 +160,7 @@ export default function Home() {
               <div className="px-4 pb-4">
                 <h2 className="text-lg font-bold text-gray-900 mb-2 leading-snug">
                   <Link 
-                    href={`/blog/archives/${post.id}`}
+                    href={`/blog/archives/${post.id}?from=home&page=${currentPage}`}
                     className="hover:text-blue-600 transition-colors"
                   >
                     {post.title}

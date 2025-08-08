@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import postsData from '@/data/posts.json';
 import { processWordPressImages, processYouTubeLinks } from '@/utils/imageUtils';
+import { BackButton } from '@/components/BackButton';
 
 interface Post {
   id: number;
@@ -84,6 +85,7 @@ export default async function BlogPost({ params }: { params: Promise<{ id: strin
   return (
     <div className="min-h-screen bg-gray-50">
       <article className="max-w-4xl mx-auto px-4 py-8">
+      <BackButton />
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
