@@ -184,6 +184,12 @@ body {
   font-style: italic;
 }
 
+/* Dark card styles in prose content (e.g. AI consciousness post) */
+.prose div[style*="background:#1a1f35"] p,
+.prose div[style*="background:#1a1d27"] p {
+  color: #e0e0e0;
+}
+
 /* Text truncation utility */
 .line-clamp-2 {
   overflow: hidden;
