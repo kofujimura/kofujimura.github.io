@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "Fujimura Seminar",
   description: "web programming & information visualization",
   icons: {
-    icon: '/favicon.ico',
+    icon: '/fujimulab_mark_120x120.png',
   },
 };
 
