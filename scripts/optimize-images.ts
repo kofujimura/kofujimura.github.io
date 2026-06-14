@@ -55,11 +55,8 @@ async function optimizeImage(inputPath: string): Promise<void> {
       return;
     }
     
-    // Calculate appropriate sizes (don't upscale)
-    const targetSizes = config.sizes.filter(size => size <= Math.max(metadata.width, metadata.height));
-    if (targetSizes.length === 0) {
-      targetSizes.push(Math.max(metadata.width, metadata.height));
-    }
+    // Use all configured sizes; withoutEnlargement prevents actual upscaling
+    const targetSizes = config.sizes;
     
     for (const format of config.formats) {
       for (const size of targetSizes) {
