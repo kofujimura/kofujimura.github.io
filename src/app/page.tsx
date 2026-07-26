@@ -21,6 +21,15 @@ interface Post {
   featuredImageUrl?: string;
 }
 
+interface PostSummary {
+  id: number;
+  title: string;
+  excerpt: string;
+  date: string;
+  categories: string[];
+  featuredImageUrl?: string;
+}
+
 const posts: Post[] = postsData;
 const POSTS_PER_PAGE = 12;
 
@@ -33,17 +42,35 @@ function formatDate(dateString: string): string {
   });
 }
 
-function extractPlainText(html: string): string {
-  return html
+function createExcerpt(post: Post): string {
+  const source = post.excerpt.trim() || post.content;
+  const plainText = source
     .replace(/<[^>]*>/g, '')
     .replace(/&[^;]+;/g, ' ')
-    .trim()
-    .substring(0, 120) + '...';
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return plainText.length > 120
+    ? `${plainText.substring(0, 120)}...`
+    : plainText;
 }
 
+function toPostSummary(post: Post): PostSummary {
+  return {
+    id: post.id,
+    title: post.title,
+    excerpt: createExcerpt(post),
+    date: post.date,
+    categories: post.categories,
+    featuredImageUrl: post.featuredImageUrl,
+  };
+}
+
+const postSummaries = posts.map(toPostSummary);
+
 export default function Home() {
-  const initialPosts = posts.slice(0, POSTS_PER_PAGE);
-  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+  const initialPosts = postSummaries.slice(0, POSTS_PER_PAGE);
+  const totalPages = Math.ceil(postSummaries.length / POSTS_PER_PAGE);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50">
@@ -84,7 +111,7 @@ export default function Home() {
                 </h2>
                 
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed">
-                  {extractPlainText(post.content)}
+                  {post.excerpt}
                 </p>
                 
                 <div className="flex items-center text-xs text-gray-500">
@@ -97,7 +124,7 @@ export default function Home() {
         
         {totalPages > 1 && (
           <SimpleLoadMore 
-            allPosts={posts} 
+            allPosts={postSummaries}
             postsPerPage={POSTS_PER_PAGE}
           />
         )}

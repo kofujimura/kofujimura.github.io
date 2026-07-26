@@ -7,7 +7,6 @@ const nextConfig: NextConfig = {
   // If you were using a project site, you would add: basePath: '/repo-name'
   images: {
     unoptimized: true,
-    domains: ['web.fujimura.com', 'qa.fujimura.com'],
     remotePatterns: [
       {
         protocol: 'https',

@@ -4,28 +4,24 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { OptimizedImage } from '@/components/OptimizedImage';
 
-interface Post {
+interface PostSummary {
   id: number;
   title: string;
-  content: string;
   excerpt: string;
   date: string;
-  modified: string;
-  slug: string;
-  status: string;
-  type?: string;
-  author: string;
   categories: string[];
-  tags: string[];
-  link?: string;
-  featuredImageId?: number;
   featuredImageUrl?: string;
 }
 
 interface SimpleLoadMoreProps {
-  allPosts: Post[];
+  allPosts: PostSummary[];
   postsPerPage: number;
 }
+
+const STORAGE_KEYS = {
+  currentPage: 'postListCurrentPage:v2',
+  displayedPosts: 'displayedPostSummaries:v2',
+};
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -36,25 +32,17 @@ function formatDate(dateString: string): string {
   });
 }
 
-function extractPlainText(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, '')
-    .replace(/&[^;]+;/g, ' ')
-    .trim()
-    .substring(0, 120) + '...';
-}
-
 export function SimpleLoadMore({ allPosts, postsPerPage }: SimpleLoadMoreProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
+  const [displayedPosts, setDisplayedPosts] = useState<PostSummary[]>([]);
   const [loading, setLoading] = useState(false);
 
   const totalPages = Math.ceil(allPosts.length / postsPerPage);
 
   useEffect(() => {
     // Check for saved state only after component mounts
-    const savedPage = sessionStorage.getItem('currentPage');
-    const savedPosts = sessionStorage.getItem('displayedPosts');
+    const savedPage = sessionStorage.getItem(STORAGE_KEYS.currentPage);
+    const savedPosts = sessionStorage.getItem(STORAGE_KEYS.displayedPosts);
     
     if (savedPage && savedPosts && Number(savedPage) > 1) {
       const page = Math.min(Number(savedPage), totalPages);
@@ -86,8 +74,8 @@ export function SimpleLoadMore({ allPosts, postsPerPage }: SimpleLoadMoreProps) 
     
     // Save complete state including initial posts
     const allDisplayed = [...allPosts.slice(0, postsPerPage), ...displayedPosts, ...pagesPosts];
-    sessionStorage.setItem('currentPage', page.toString());
-    sessionStorage.setItem('displayedPosts', JSON.stringify(allDisplayed));
+    sessionStorage.setItem(STORAGE_KEYS.currentPage, page.toString());
+    sessionStorage.setItem(STORAGE_KEYS.displayedPosts, JSON.stringify(allDisplayed));
     
     setLoading(false);
   };
@@ -137,7 +125,7 @@ export function SimpleLoadMore({ allPosts, postsPerPage }: SimpleLoadMoreProps) 
                 </h2>
                 
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed">
-                  {extractPlainText(post.content)}
+                  {post.excerpt}
                 </p>
                 
                 <div className="flex items-center text-xs text-gray-500">
