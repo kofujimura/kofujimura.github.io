@@ -5,7 +5,7 @@ WordPressから移行したNext.js製の静的サイトです。GitHub Pagesで�
 ## サイト情報
 
 - **URL**: https://kofujimura.github.io/
-- **技術スタック**: Next.js 15, TypeScript, Tailwind CSS, Sharp (画像最適化)
+- **技術スタック**: Next.js 16, TypeScript, Tailwind CSS, Sharp (画像最適化)
 - **ホスティング**: GitHub Pages
 - **自動デプロイ**: GitHub Actions
 
@@ -68,6 +68,7 @@ WordPressから移行したNext.js製の静的サイトです。GitHub Pagesで�
 - **新規画像**: `public/images/記事ID/` または `public/images/年月/` に整理して配置
 - **画像最適化**: 自動で AVIF・WebP・最適化PNG/JPEG が生成されます
 - **レスポンシブ対応**: 4つのサイズ (320w, 640w, 960w, 1280w) が自動生成
+- **生成物もコミット**: 画像を置いたら `npm run optimize-images` を実行し、生成された `*-320w.*` 〜 `*-1280w.*` と `*-optimized.*` も一緒にコミットしてください。生成済みファイルはビルド時にスキップされるので、CI が数分短縮されます（忘れても CI 側で生成されるため、サイトは正しく表示されます）
 - **alt属性**: 必ず適切な代替テキストを設定
 - **現代ブラウザ対応**: AVIF → WebP → 元フォーマットの順で配信
 - **表示動作**: トップページ（3カラム）と記事ページ（大きく表示）で自動調整
@@ -101,7 +102,10 @@ import { OptimizedImage } from '@/components/OptimizedImage';
 記事を追加した後：
 
 ```bash
-# 変更をコミット
+# 画像を追加した場合は最適化ファイルを生成（数秒〜1分）
+npm run optimize-images
+
+# 変更をコミット（生成された画像ファイルも含める）
 git add .
 git commit -m "新しい記事を追加: [記事タイトル]"
 
@@ -190,7 +194,7 @@ src/
 ## 注意事項
 
 1. **記事ID**: 既存の記事IDと重複しないように注意
-2. **画像最適化**: ビルド時に自動で最適化されるため、元画像をそのままアップロード可能
+2. **画像最適化**: 元画像をそのまま `public/images/` に置けばよい。生成された最適化ファイルは削除せずにコミットする（既に存在するファイルは再生成されない）
 3. **HTML**: 記事内容はHTMLエスケープされないため、適切なHTMLを記述
 4. **URL構造**: 記事URLは`/blog/archives/[id]/`の形式を維持
 5. **画像フォーマット**: PNG・JPEG・WebP・AVIFがサポートされています
@@ -199,14 +203,16 @@ src/
 
 ### 自動最適化の詳細
 
-- **実行タイミング**: `npm run build` および `npm run export` 時に自動実行
-- **対象ディレクトリ**: `public/images/` と `public/wp-content/uploads/`
+- **実行タイミング**: `npm run build` および `npm run export` 時に自動実行（`npm run optimize-images` で単独実行も可）
+- **対象ディレクトリ**: `public/images/` のみ（`public/wp-content/uploads/` の WordPress 継承画像は元ファイルをそのまま配信）
 - **生成される形式**:
   - AVIF（最新・最高効率）
   - WebP（広くサポート）
-  - 最適化PNG/JPEG（フォールバック）
-- **レスポンシブサイズ**: 320w, 640w, 960w, 1280w, 1920w
+  - 最適化PNG（フォールバック）、および元形式の `*-optimized.*`
+- **レスポンシブサイズ**: 320w, 640w, 960w, 1280w
 - **圧縮率**: 80%品質、90-99%のファイルサイズ削減を実現
+- **スキップ条件**: 出力ファイルが既に存在すればスキップ。生成物は git にコミットしてあるため、CI（GitHub Actions）では実質すべてスキップされ、画像生成に時間がかからない
+- **再生成したい場合**: 同名で画像を差し替えたときは古い生成物を削除してから実行する（下記「画像を差し替えたとき」参照）
 
 ### 最適化の効果
 
@@ -226,15 +232,25 @@ ls public/images/sample-320w.webp
 ls public/images/sample-optimized.png
 ```
 
+### 画像を差し替えたとき
+
+既存の生成物があると再生成されないため、同じファイル名で画像を差し替えた場合は古い生成物を削除してから実行します：
+
+```bash
+# 例: public/images/sample.png を差し替えた場合
+rm public/images/sample-{320,640,960,1280}w.* public/images/sample-optimized.*
+npm run optimize-images
+```
+
 ## トラブルシューティング
 
 ### ビルドエラーが発生した場合
 
 ```bash
 # 型チェック
-npm run type-check
+npx tsc --noEmit
 
-# リンターチェック
+# リンターチェック（src/ 配下）
 npm run lint
 
 # ローカルでビルドテスト（画像最適化含む）
@@ -248,10 +264,9 @@ npm run build
 npm uninstall sharp
 npm install sharp --save-dev
 
-# 最適化画像のクリア（必要に応じて）
-find public/images -name "*-*w.webp" -delete
-find public/images -name "*-*w.avif" -delete
-find public/images -name "*-optimized.*" -delete
+# 生成画像をすべて削除して作り直す（必要に応じて。約1分）
+find public/images \( -name "*-320w.*" -o -name "*-640w.*" -o -name "*-960w.*" -o -name "*-1280w.*" -o -name "*-optimized.*" \) -delete
+npm run optimize-images
 ```
 
 ### GitHub Actions失敗時

@@ -14,6 +14,15 @@ const config: ImageOptimizationConfig = {
   formats: ['webp', 'avif', 'png'] // Modern formats first, fallback to original
 };
 
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function findImages(dir: string): Promise<string[]> {
   const files: string[] = [];
   const items = await fs.readdir(dir, { withFileTypes: true });
@@ -62,15 +71,11 @@ async function optimizeImage(inputPath: string): Promise<void> {
       for (const size of targetSizes) {
         const outputPath = `${basePath}-${size}w.${format}`;
         
-        // Skip if already exists and is newer
-        try {
-          const inputStat = await fs.stat(inputPath);
-          const outputStat = await fs.stat(outputPath);
-          if (outputStat.mtime > inputStat.mtime) {
-            continue;
-          }
-        } catch {
-          // File doesn't exist, continue with optimization
+        // Skip if already exists. Generated files are committed to git, so this
+        // lets CI (fresh checkout, no reliable mtimes) skip all existing images.
+        // To force regeneration, delete the generated files first.
+        if (await fileExists(outputPath)) {
+          continue;
         }
         
         let processor = image.clone().resize(size, null, { 
@@ -101,6 +106,10 @@ async function optimizeImage(inputPath: string): Promise<void> {
     // Also create an optimized version of the original
     const originalFormat = ext.slice(1) as 'png' | 'jpeg';
     const optimizedOriginal = `${basePath}-optimized${ext}`;
+    
+    if (await fileExists(optimizedOriginal)) {
+      return;
+    }
     
     let processor = image.clone();
     if (originalFormat === 'png') {

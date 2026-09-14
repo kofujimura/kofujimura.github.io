@@ -20,6 +20,7 @@
       "cd /home/fujimura_ko/claude/fujimura-seminar/",
       "mkdir -p public/images/2025/07/",
       "# 画像ファイルをpublic/images/2025/07/に配置",
+      "npm run optimize-images",
       "node scripts/create-post.js add-direct '{\"title\":\"記事タイトル\",\"content\":\"<p>記事内容</p><img src=\\\"/images/2025/07/image.jpg\\\" alt=\\\"説明\\\" style=\\\"max-width: 100%; height: auto;\\\" /></p>\",\"featuredImageUrl\":\"/images/2025/07/featured.jpg\"}'"
     ]
   },
@@ -123,6 +124,12 @@
         "action": "reference_in_content", 
         "html_format": "<img src=\"/images/2025/07/filename.jpg\" alt=\"画像の説明\" style=\"max-width: 100%; height: auto;\" />",
         "description": "記事内で画像を参照"
+      },
+      {
+        "step": 4,
+        "action": "generate_optimized_images",
+        "command": "npm run optimize-images",
+        "description": "最適化画像（*-320w.* 〜 *-1280w.*, *-optimized.*）を生成する。生成物もgitにコミットする。既に存在する生成物はスキップされる（同名で差し替えた場合は古い生成物を削除してから実行）。実行を忘れてもCIで生成されるが、生成物をコミットしておくとCIが数分短縮される"
       }
     ],
     "featured_image": {
@@ -254,8 +261,8 @@
       {
         "step": 1,
         "action": "stage_changes",
-        "command": "git add src/data/posts.json public/images/[画像ファイル]",
-        "description": "変更されたファイルをステージングエリアに追加"
+        "command": "git add src/data/posts.json public/images/",
+        "description": "変更されたファイルをステージングエリアに追加（元画像に加えて、npm run optimize-images で生成された最適化画像も含める）"
       },
       {
         "step": 2,
