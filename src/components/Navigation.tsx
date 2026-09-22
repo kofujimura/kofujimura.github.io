@@ -10,9 +10,9 @@ const navLinks = [
 
 export default function Navigation() {
   return (
-    <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+    <nav className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-gray-200/70">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between h-12">
+        <div className="flex items-center justify-between h-14">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image
               src="/images/fujimulab-logo.png"
@@ -25,23 +25,22 @@ export default function Navigation() {
           </Link>
 
           {/* PC: inline links */}
-          <div className="hidden md:flex items-center space-x-1 text-sm text-gray-600">
-            {navLinks.map((link, i) => (
+          <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
+            {navLinks.map((link) => (
               <span key={link.href} className="flex items-center">
-                {i > 0 && <span className="text-gray-400 mx-1">•</span>}
                 {link.external ? (
                   <a
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-blue-600 transition-colors px-2 py-1 rounded hover:bg-blue-50"
+                    className="py-1 hover:text-blue-600 transition-colors hover:underline underline-offset-8 decoration-2 decoration-pink-500"
                   >
                     {link.label}
                   </a>
                 ) : (
                   <Link
                     href={link.href}
-                    className="hover:text-blue-600 transition-colors px-2 py-1 rounded hover:bg-blue-50"
+                    className="py-1 hover:text-blue-600 transition-colors hover:underline underline-offset-8 decoration-2 decoration-pink-500"
                   >
                     {link.label}
                   </Link>
@@ -76,7 +75,7 @@ export default function Navigation() {
             </summary>
 
             {/* ドロップダウン: fixed でビューポート基準に配置 */}
-            <div className="fixed top-12 left-0 right-0 bg-white border-b border-gray-200 shadow-md z-50">
+            <div className="fixed top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-md z-50">
               <div className="max-w-6xl mx-auto px-4 py-2 flex flex-col text-sm text-gray-600">
                 {navLinks.map(link =>
                   link.external ? (
@@ -85,7 +84,7 @@ export default function Navigation() {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="py-2 px-2 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      className="py-2 px-2 hover:text-blue-600 hover:bg-slate-50 rounded transition-colors"
                     >
                       {link.label}
                     </a>
@@ -93,7 +92,7 @@ export default function Navigation() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="py-2 px-2 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      className="py-2 px-2 hover:text-blue-600 hover:bg-slate-50 rounded transition-colors"
                     >
                       {link.label}
                     </Link>

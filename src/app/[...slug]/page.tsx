@@ -109,7 +109,7 @@ export default async function PageComponent({ params }: { params: Promise<{ slug
   const cleanContent = parseWordPressContent(page.content);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <main className="max-w-4xl mx-auto px-4 py-8">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">{page.title}</h1>
@@ -121,7 +121,7 @@ export default async function PageComponent({ params }: { params: Promise<{ slug
         </header>
         
         <article 
-          className="prose prose-lg max-w-none bg-white p-8 rounded-lg shadow-sm"
+          className="prose prose-lg max-w-none bg-white px-5 py-8 md:px-12 md:py-12 rounded-2xl shadow-[0_1px_3px_rgba(15,23,42,0.06)]"
           dangerouslySetInnerHTML={{ __html: cleanContent }}
         />
       </main>

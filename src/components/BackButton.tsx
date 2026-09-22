@@ -17,7 +17,7 @@ export function BackButton() {
     <div className="mb-6">
       <button 
         onClick={handleBack}
-        className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+        className="inline-flex items-center text-sm text-gray-500 hover:text-blue-600 transition-colors"
       >
         ← 戻る
       </button>
